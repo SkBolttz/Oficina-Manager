@@ -3,9 +3,12 @@ package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
-import org.jspecify.annotations.Nullable;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.ClienteNaoLocalizadoException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Funcionario.FuncionarioNaoLocalizadoException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.OS.*;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Veiculo.VeiculoNaoLocalizadoException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -91,13 +94,13 @@ public class OrdemServicoService {
         validarOSAlteravel(os);
 
         Servico servico = servicoRepository.findByIdAndOficina(dto.idServico(), oficina)
-                .orElseThrow(() -> new RegraNegocioException("Serviço não encontrado"));
+                .orElseThrow(() -> new ServicoNaoLocalizadoException("Serviço não encontrado"));
 
         boolean jaExiste = os.getServicos().stream()
                 .anyMatch(s -> s.getServico().getId().equals(servico.getId()));
 
         if (jaExiste) {
-            throw new RegraNegocioException("Serviço já adicionado a esta OS");
+            throw new ServicoDuplicadoOSException("Serviço já adicionado a esta OS");
         }
 
         ItemServicoOS item = new ItemServicoOS();
@@ -123,14 +126,14 @@ public class OrdemServicoService {
         validarOSAlteravel(os);
 
         Estoque produto = estoqueRepository.findByIdAndOficina(dto.idProduto(), oficina)
-                .orElseThrow(() -> new RegraNegocioException("Produto não encontrado"));
+                .orElseThrow(() -> new ProdutoNaoLocalizadoException("Produto não encontrado"));
 
         if (!produto.getAtivo()) {
-            throw new RegraNegocioException("Produto inativo");
+            throw new StatusProdutoException("Produto inativo");
         }
 
         if (produto.getEstoqueAtual() < dto.quantidade()) {
-            throw new RegraNegocioException("Quantidade solicitada maior que o estoque disponível");
+            throw new QuantidadeEstoqueException("Quantidade solicitada maior que o estoque disponível");
         }
 
         ItemEstoqueOS item = new ItemEstoqueOS();
@@ -174,7 +177,7 @@ public class OrdemServicoService {
         ItemEstoqueOS item = os.getProdutos().stream()
                 .filter(p -> p.getId().equals(itemEstoqueId))
                 .findFirst()
-                .orElseThrow(() -> new RegraNegocioException("Produto não encontrado na OS"));
+                .orElseThrow(() -> new ProdutoNaoLocalizadoException("Produto não encontrado na OS"));
 
         Estoque produto = item.getProduto();
         produto.setEstoqueAtual(produto.getEstoqueAtual() + item.getQuantidade());
@@ -195,7 +198,7 @@ public class OrdemServicoService {
         OrdemServico os = localizarOS(osId, oficina);
 
         if (os.getStatus() != Status.ABERTA) {
-            throw new RegraNegocioException("Somente OS em ABERTA podem ser iniciadas");
+            throw new StatusOSException("Somente OS em ABERTA podem ser iniciadas");
         }
 
         os.setStatus(Status.EM_EXECUCAO);
@@ -209,7 +212,7 @@ public class OrdemServicoService {
         OrdemServico os = localizarOS(osId, oficina);
 
         if (os.getStatus() != Status.EM_EXECUCAO) {
-            throw new RegraNegocioException("Somente OS em execução podem aguardar peça");
+            throw new StatusOSException("Somente OS em execução podem aguardar peça");
         }
 
         os.setStatus(Status.AGUARDANDO_PECA);
@@ -223,7 +226,7 @@ public class OrdemServicoService {
         OrdemServico os = localizarOS(osId, oficina);
 
         if (os.getStatus() == Status.FINALIZADA) {
-            throw new RegraNegocioException("OS já finalizada");
+            throw new StatusOSException("OS já finalizada");
         }
 
         os.setQuilometragemSaida(finalizarOsDTO.quilometragemSaida());
@@ -250,7 +253,7 @@ public class OrdemServicoService {
         OrdemServico os = localizarOS(osId, oficina);
 
         if (os.getStatus() == Status.FINALIZADA) {
-            throw new RegraNegocioException("Não é possível cancelar OS finalizada");
+            throw new StatusOSException("Não é possível cancelar OS finalizada");
         }
 
         os.setStatus(Status.CANCELADA);
@@ -273,7 +276,7 @@ public class OrdemServicoService {
         Page<OrdemServico> ordens = osRepository.findByOficina(oficina, pageable);
 
         if (ordens.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Nenhuma ordem de serviço encontrada");
+            throw new OSNaoLocalizadaException("Nenhuma ordem de serviço encontrada");
         }
 
         return ordens.map(osMapper::toDTO);
@@ -285,7 +288,7 @@ public class OrdemServicoService {
         Page<OrdemServico> ordens = osRepository.findByOficinaAndStatus(oficina, status, pageable);
 
         if (ordens.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Nenhuma OS encontrada com o status informado");
+            throw new OSNaoLocalizadaException("Nenhuma OS encontrada com o status informado");
         }
 
         return ordens.map(osMapper::toDTO);
@@ -327,7 +330,7 @@ public class OrdemServicoService {
                     ? "Nenhuma ordem de serviço encontrada para o funcionário informado"
                     : "Nenhuma ordem de serviço com status " + status + " encontrada para o funcionário informado";
 
-            throw new RecursoNaoEncontradoException(msg);
+            throw new OSNaoLocalizadaException(msg);
         }
 
         return os.map(osMapper::toDTO);
@@ -339,32 +342,32 @@ public class OrdemServicoService {
     // =========================================================
     private OrdemServico localizarOS(Long osId, Oficina oficina) {
         return osRepository.findByIdAndOficina(osId, oficina)
-                .orElseThrow(() -> new RegraNegocioException("Ordem de serviço não encontrada"));
+                .orElseThrow(() -> new OSNaoLocalizadaException("Ordem de serviço não encontrada"));
     }
 
     private Oficina localizarOficina(String cnpj) {
         return oficinaRepository.findByCnpj(cnpj)
-                .orElseThrow(() -> new RegraNegocioException("Oficina não encontrada"));
+                .orElseThrow(() -> new OficinaNaoLocalizadaException("Oficina não encontrada"));
     }
 
     private Cliente localizarCliente(Oficina oficina, String cpfCnpj) {
         return clienteRepository.findByCpfCnpjAndOficina(cpfCnpj, oficina)
-                .orElseThrow(() -> new RegraNegocioException("Cliente não encontrado"));
+                .orElseThrow(() -> new ClienteNaoLocalizadoException("Cliente não encontrado"));
     }
 
     private Veiculo localizarVeiculo(Oficina oficina, String placa) {
         return veiculoRepository.findByPlacaAndOficina(placa, oficina)
-                .orElseThrow(() -> new RegraNegocioException("Veículo não encontrado"));
+                .orElseThrow(() -> new VeiculoNaoLocalizadoException("Veículo não encontrado"));
     }
 
     private Funcionario localizarFuncionario(Oficina oficina, String cpf) {
         return funcionarioRepository.findByCpfAndOficina(cpf, oficina)
-                .orElseThrow(() -> new RegraNegocioException("Funcionário não encontrado"));
+                .orElseThrow(() -> new FuncionarioNaoLocalizadoException("Funcionário não encontrado"));
     }
 
     private void validarOSAlteravel(OrdemServico os) {
         if (os.getStatus() == Status.FINALIZADA || os.getStatus() == Status.CANCELADA) {
-            throw new RegraNegocioException("Não é possível alterar OS finalizada ou cancelada");
+            throw new StatusOSException("Não é possível alterar OS finalizada ou cancelada");
         }
     }
 
