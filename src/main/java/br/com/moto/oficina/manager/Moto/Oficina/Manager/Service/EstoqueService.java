@@ -2,6 +2,11 @@ package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 
 import java.time.LocalDate;
 
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Estoque.CodigoItemDuplicadoException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Estoque.EstoqueInsuficienteException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Estoque.EstoqueNuloException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Estoque.ItemEstoqueNaoLocalizadoException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -74,7 +79,7 @@ public class EstoqueService {
                 .setUnidadeMedida(dto.unidadeMedida() == null ? itemEstoque.getUnidadeMedida() : dto.unidadeMedida());
         // Garantir que estoqueAtual não fique negativo
         if (dto.estoqueAtual() < 0) {
-            throw new RegraNegocioException("Estoque atual nao pode ser negativo");
+            throw new EstoqueNuloException("Estoque atual nao pode ser negativo");
         } else {
             itemEstoque
                     .setEstoqueAtual(dto.estoqueAtual() == null ? itemEstoque.getEstoqueAtual() : dto.estoqueAtual());
@@ -117,7 +122,6 @@ public class EstoqueService {
     public EstoqueDTO buscarItemEstoque(String cnpj, String codigoItem) {
         Oficina oficina = localizarOficina(cnpj);
 
-        System.out.println("CNPJ da oficina: " + oficina.getCnpj() + ", Codigo do item: " + codigoItem);
         Estoque itemEstoque = localizarItemCodigo(codigoItem, oficina);
         return estoqueMapper.toDTO(itemEstoque);
     }
@@ -128,7 +132,7 @@ public class EstoqueService {
                 pageable);
 
         if (itensEstoque.isEmpty()) {
-            throw new RegraNegocioException("Item de estoque não encontrado");
+            throw new ItemEstoqueNaoLocalizadoException("Item de estoque não encontrado");
         }
 
         return itensEstoque.map(estoqueMapper::toDTO);
@@ -165,7 +169,7 @@ public class EstoqueService {
 
         int novaQuantidade = item.getEstoqueAtual() + quantidade;
         if (novaQuantidade < 0) {
-            throw new RegraNegocioException("Quantidade insuficiente em estoque");
+            throw new EstoqueInsuficienteException("Quantidade insuficiente em estoque");
         }
 
         item.setEstoqueAtual(novaQuantidade);
@@ -194,30 +198,26 @@ public class EstoqueService {
 
     private Oficina localizarOficina(String cnpj) {
         Oficina oficina = oficinaRepository.findByCnpj(cnpj)
-                .orElseThrow(() -> new RegraNegocioException("Oficina não encontrada"));
-
-        if (oficina == null) {
-            throw new RegraNegocioException("Oficina não encontrada");
-        }
+                .orElseThrow(() -> new OficinaNaoLocalizadaException("Oficina não encontrada"));
 
         return oficina;
     }
 
     private Estoque localizarItemEstoque(Long id, Oficina oficina) {
         return estoqueRepository.findByIdAndOficina(id, oficina)
-                .orElseThrow(() -> new RegraNegocioException("Item de estoque não encontrado"));
+                .orElseThrow(() -> new ItemEstoqueNaoLocalizadoException("Item de estoque não encontrado"));
     }
 
     private void validarDuplicidade(String nome, Oficina oficina) {
         boolean existe = estoqueRepository.existsByCodigoAndOficina(nome, oficina);
         if (existe) {
-            throw new RegraNegocioException("Já existe um item de estoque com esse código na oficina");
+            throw new CodigoItemDuplicadoException("Já existe um item de estoque com esse código na oficina");
         }
     }
 
     private Estoque localizarItemCodigo(String codigoItem, Oficina oficina ) {
         Estoque itemEstoque = estoqueRepository.findByCodigoAndOficina(codigoItem, oficina)
-                .orElseThrow(() -> new RegraNegocioException("Item de estoque não encontrado"));
+                .orElseThrow(() -> new ItemEstoqueNaoLocalizadoException("Item de estoque não encontrado"));
         return itemEstoque;
     }
 }
