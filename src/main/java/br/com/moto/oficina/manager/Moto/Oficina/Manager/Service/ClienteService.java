@@ -1,6 +1,9 @@
 package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 
 import java.time.LocalDate;
+
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.*;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -9,8 +12,6 @@ import br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.Cliente.ClienteCadas
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.Cliente.ClienteDTO;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Entity.Cliente;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Entity.Oficina;
-import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.RecursoNaoEncontradoException;
-import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.RegraNegocioException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Mapper.Cliente.ClienteMapper;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Mapper.Endereco.EnderecoMapper;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Repository.ClienteRepository;
@@ -170,7 +171,7 @@ public class ClienteService {
 
     private void validarEmailDuplicado(Oficina oficina, String email) {
         if (clienteRepository.findByEmailAndOficina(email, oficina) != null) {
-            throw new RegraNegocioException("E-mail já cadastrado");
+            throw new EmailDuplicadoException("E-mail já cadastrado");
         }
     }
 
@@ -180,7 +181,7 @@ public class ClienteService {
                 .existsByCpfCnpjAndOficina(cpfCnpjNormalizado, oficina);
 
         if (existe) {
-            throw new RegraNegocioException("CPF/CNPJ já cadastrado");
+            throw new CPFCNPJDuplicadoException("CPF/CNPJ já cadastrado");
         }
     }
 
@@ -190,7 +191,7 @@ public class ClienteService {
 
         return clienteRepository
                 .findByCpfCnpjAndOficina(cpfCnpjNormalizado, oficina)
-                .orElseThrow(() -> new RegraNegocioException("Cliente não encontrado"));
+                .orElseThrow(() -> new ClienteNaoLocalizadoException("Cliente não encontrado"));
     }
 
     private Oficina localizarOficina(String cnpj) {
@@ -198,11 +199,7 @@ public class ClienteService {
         String cnpjNormalizado = normalizarCpfCnpj(cnpj);
 
         Oficina oficina = oficinaRepository.findByCnpj(cnpjNormalizado)
-                .orElseThrow(() -> new RegraNegocioException("Oficina nao encontrada"));
-
-        if (oficina == null) {
-            throw new RegraNegocioException("Oficina nao encontrada");
-        }
+                .orElseThrow(() -> new OficinaNaoLocalizadaException("Oficina nao encontrada"));
 
         return oficina;
     }
@@ -210,13 +207,13 @@ public class ClienteService {
     private String normalizarCpfCnpj(String cpfCnpj) {
 
         if (cpfCnpj == null) {
-            throw new RegraNegocioException("CPF/CNPJ não pode ser nulo");
+            throw new CPFCNPJNuloException("CPF/CNPJ não pode ser nulo");
         }
 
         String normalizado = cpfCnpj.replaceAll("\\D", "");
 
         if (!(normalizado.length() == 11 || normalizado.length() == 14)) {
-            throw new RegraNegocioException("CPF/CNPJ inválido");
+            throw new CPFCNPJInvalidoException("CPF/CNPJ inválido");
         }
 
         return normalizado;
