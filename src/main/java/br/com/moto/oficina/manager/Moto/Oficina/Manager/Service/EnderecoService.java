@@ -1,5 +1,9 @@
 package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.ClienteNaoLocalizadoException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Endereco.CepNaoLocalizadoException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Funcionario.FuncionarioNaoLocalizadoException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
 import org.springframework.stereotype.Service;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Api.ViaCep;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.Endereco.EnderecoDTO;
@@ -14,6 +18,7 @@ import br.com.moto.oficina.manager.Moto.Oficina.Manager.Repository.ClienteReposi
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Repository.EnderecoRepository;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Repository.FuncionarioRepository;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Repository.OficinaRepository;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.ClienteNaoLocalizadoException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -60,7 +65,7 @@ public class EnderecoService {
 
                 Oficina oficina = oficinaRepository.findByCnpj(cnpj).orElseThrow();
                 Cliente clienteLocalizado = clienteRepository
-                                .findByCpfCnpjAndOficina(cliente.getCpfCnpj(), oficina).orElseThrow();
+                                .findByCpfCnpjAndOficina(cliente.getCpfCnpj(), oficina).orElseThrow(() -> new ClienteNaoLocalizadoException("Cliente não localizado"));
 
                 Endereco endereco = clienteLocalizado.getEndereco();
 
@@ -96,7 +101,7 @@ public class EnderecoService {
 
                 Oficina oficina = oficinaRepository.findByCnpj(cnpj).orElseThrow();
                 Funcionario funcionarioLocalizado = funcionarioRepository
-                                .findByCpfAndOficina(funcionario.getCpf(), oficina).orElseThrow();
+                                .findByCpfAndOficina(funcionario.getCpf(), oficina).orElseThrow(() -> new FuncionarioNaoLocalizadoException("Funcionário não localizado"));
 
                 Endereco endereco = funcionarioLocalizado.getEndereco();
 
@@ -130,7 +135,7 @@ public class EnderecoService {
 
         public void atualizarEnderecoOficina(Oficina oficina, AtualizarOficinaDTO dto) {
 
-                Oficina oficinaLocalizada = oficinaRepository.findByCnpj(oficina.getCnpj()).orElseThrow();
+                Oficina oficinaLocalizada = oficinaRepository.findByCnpj(oficina.getCnpj()).orElseThrow(() -> new OficinaNaoLocalizadaException("Oficina não localizada"));
                 Endereco endereco = oficinaLocalizada.getEndereco();
 
                 if (dto.endereco().cep() != null) {
@@ -186,13 +191,10 @@ public class EnderecoService {
 
         public EnderecoDTO buscarCep(String cep) {
 
-                System.out.println("Entrou aqui UM");
-                System.out.println(cep);
-                
                 ViaCepDTO cepAPI = viaCep.buscarCep(cep);
 
                 if (viaCep == null || cepAPI.cep() == null) {
-                        throw new RegraNegocioException("CEP não encontrado");
+                        throw new CepNaoLocalizadoException("CEP não encontrado");
                 }
 
                 return new EnderecoDTO(
