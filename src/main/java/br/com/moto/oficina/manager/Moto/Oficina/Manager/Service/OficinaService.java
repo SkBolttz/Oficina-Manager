@@ -2,6 +2,10 @@ package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 
 import java.time.LocalDate;
 
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.API.ErroReceitaFederalException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.CNPJInvalidoException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.DuplicidadeCnpjException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
 import org.springframework.stereotype.Service;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Api.ReceitaWS;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.Oficina.AtualizarOficinaDTO;
@@ -74,18 +78,12 @@ public class OficinaService {
      */
     public void atualizarDadosOficina(String cnpj, AtualizarOficinaDTO dto) {
 
-        System.out.println("Passou por aqui UM");
-
         String cnpjNormalizado = normalizarCnpj(cnpj);
         validarFormatoCnpj(cnpjNormalizado);
 
-        System.out.println("Passou por aqui DOIS");
-
         Oficina oficina = oficinaRepository
                 .findByCnpj(cnpjNormalizado)
-                .orElseThrow(() -> new RegraNegocioException("Oficina não encontrada"));
-
-        System.out.println("Passou por aqui TRES");
+                .orElseThrow(() -> new OficinaNaoLocalizadaException("Oficina não encontrada"));
 
         if (dto.nome() != null) {
             oficina.setNome(dto.nome());
@@ -131,7 +129,7 @@ public class OficinaService {
 
         Oficina oficina = oficinaRepository
                 .findByCnpj(cnpjNormalizado)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Oficina não encontrada"));
+                .orElseThrow(() -> new OficinaNaoLocalizadaException("Oficina não encontrada"));
 
         return oficinaMapper.toDtoBusca(oficina);
     }
@@ -147,26 +145,26 @@ public class OficinaService {
             OficinaDTO oficina = receitaWS.buscarCnpj(cnpjNormalizado);
 
             if (oficina == null) {
-                throw new RegraNegocioException("CNPJ não encontrado na Receita Federal");
+                throw new CNPJInvalidoException("CNPJ não encontrado na Receita Federal");
             }
 
             return oficina;
         } catch (Exception e) {
-            throw new RegraNegocioException(
+            throw new ErroReceitaFederalException(
                     "Erro ao consultar a Receita Federal. Tente novamente mais tarde");
         }
     }
 
     private void validarCnpjNaoCadastrado(String cnpjNormalizado) {
         if (oficinaRepository.existsByCnpj(cnpjNormalizado)) {
-            throw new RegraNegocioException(
+            throw new DuplicidadeCnpjException(
                     "Já existe uma oficina cadastrada com este CNPJ");
         }
     }
 
     private void validarFormatoCnpj(String cnpj) {
         if (cnpj == null || !cnpj.matches("\\d{14}")) {
-            throw new RegraNegocioException(
+            throw new CNPJInvalidoException(
                     "CNPJ deve conter exatamente 14 dígitos numéricos");
         }
     }
