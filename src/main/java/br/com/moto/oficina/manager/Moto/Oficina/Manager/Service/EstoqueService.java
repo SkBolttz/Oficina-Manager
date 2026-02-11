@@ -1,8 +1,6 @@
-java
-        package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
+package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 
 import java.time.LocalDate;
-
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Estoque.CodigoItemDuplicadoException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Estoque.EstoqueInsuficienteException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Estoque.EstoqueNuloException;
@@ -16,7 +14,6 @@ import br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.Estoque.CadastroEsto
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.Estoque.EstoqueDTO;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Entity.Estoque;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Entity.Oficina;
-import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.RegraNegocioException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Mapper.Estoque.EstoqueMapper;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Repository.EstoqueRepository;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Repository.OficinaRepository;
