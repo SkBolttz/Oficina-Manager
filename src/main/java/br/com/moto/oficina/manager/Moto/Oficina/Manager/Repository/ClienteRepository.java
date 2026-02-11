@@ -12,17 +12,7 @@ import br.com.moto.oficina.manager.Moto.Oficina.Manager.Entity.Oficina;
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
-    Cliente findByEmail(String email);
-
     Cliente cpfCnpj(String cpfCnpj);
-
-    Optional<Cliente> findByCpfCnpj(String cpfCnpj);
-
-    Cliente findByNome(String nomeCliente);
-
-    List<Cliente> findByAtivo(boolean b);
-
-    List<Cliente> findByNomeContainingIgnoreCase(String nome);
 
     Optional<Cliente> findByCpfCnpjAndOficina(String cpfCnpj, Oficina oficina);
 

@@ -11,8 +11,6 @@ import br.com.moto.oficina.manager.Moto.Oficina.Manager.Entity.Oficina;
 @Repository
 public interface FuncionarioRepository extends JpaRepository<Funcionario, Long>{
 
-    Funcionario findByEmail(String email);
-
     Funcionario findByEmailAndOficina(String email, Oficina oficina);
 
     Optional<Funcionario> findByCpfAndOficina(String cpf, Oficina oficina);
