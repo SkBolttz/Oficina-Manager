@@ -33,6 +33,14 @@ public class VeiculoService {
     private final OficinaRepository oficinaRepository;
     private final VeiculoMapper veiculoMapper;
 
+    /**
+     * Construtor do serviço de veículos.
+     *
+     * @param veiculoRepository   Repositório de veículos
+     * @param clienteRepository   Repositório de clientes
+     * @param oficinaRepository   Repositório de oficinas
+     * @param veiculoMapper       Mapper para conversão entre entidade e DTO
+     */
     public VeiculoService(
             VeiculoRepository veiculoRepository,
             ClienteRepository clienteRepository,
@@ -48,6 +56,19 @@ public class VeiculoService {
      * ======================
      * Cadastrar
      * ======================
+     */
+
+    /**
+     * Cadastra um novo veículo para o cliente informado e vincula à oficina.
+     *
+     * @param cnpj              CNPJ da oficina
+     * @param cpfCnpjCliente    CPF ou CNPJ do cliente proprietário
+     * @param dto               DTO com os dados do veículo
+     * @return DTO do veículo cadastrado
+     * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
+     * @throws ClienteNaoLocalizadoException se o cliente não for encontrado
+     * @throws PlacaVaziaException           se a placa for nula ou vazia
+     * @throws PlacaDuplicadaException       se já existir veículo com a mesma placa na oficina
      */
     public VeiculoDTO cadastrarVeiculo(String cnpj, String cpfCnpjCliente, CadastrarVeiculoDTO dto) {
 
@@ -73,6 +94,19 @@ public class VeiculoService {
      * ======================
      * Atualizar
      * ======================
+     */
+
+    /**
+     * Atualiza os dados de um veículo existente identificado pela placa na oficina.
+     *
+     * Campos nulos no DTO são ignorados.
+     *
+     * @param cnpj  CNPJ da oficina
+     * @param placa Placa do veículo a ser atualizado
+     * @param dto   DTO com os campos a serem atualizados
+     * @return DTO do veículo atualizado
+     * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
+     * @throws VeiculoNaoLocalizadoException se o veículo não for encontrado
      */
     public VeiculoDTO atualizarVeiculo(String cnpj, String placa, AtualizarVeiculoDTO dto) {
 
@@ -103,6 +137,16 @@ public class VeiculoService {
      * Ativar / Desativar
      * ======================
      */
+
+    /**
+     * Ativa um veículo identificado pela placa na oficina.
+     *
+     * @param cnpj  CNPJ da oficina
+     * @param placa Placa do veículo a ser ativado
+     * @return DTO do veículo ativado
+     * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
+     * @throws VeiculoNaoLocalizadoException se o veículo não for encontrado
+     */
     public VeiculoDTO ativarVeiculo(String cnpj, String placa) {
         Oficina oficina = localizarOficina(cnpj);
         Veiculo veiculo = buscarVeiculo(oficina, placa);
@@ -110,6 +154,15 @@ public class VeiculoService {
         return veiculoMapper.toDTO(veiculoRepository.save(veiculo));
     }
 
+    /**
+     * Desativa um veículo identificado pela placa na oficina.
+     *
+     * @param cnpj  CNPJ da oficina
+     * @param placa Placa do veículo a ser desativado
+     * @return DTO do veículo desativado
+     * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
+     * @throws VeiculoNaoLocalizadoException se o veículo não for encontrado
+     */
     public VeiculoDTO desativarVeiculo(String cnpj, String placa) {
         Oficina oficina = localizarOficina(cnpj);
         Veiculo veiculo = buscarVeiculo(oficina, placa);
@@ -122,11 +175,31 @@ public class VeiculoService {
      * Buscar
      * ======================
      */
+
+    /**
+     * Busca um veículo pela placa na oficina.
+     *
+     * @param cnpj  CNPJ da oficina
+     * @param placa Placa do veículo
+     * @return DTO do veículo encontrado
+     * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
+     * @throws VeiculoNaoLocalizadoException se o veículo não for encontrado
+     */
     public VeiculoDTO buscarVeiculoPorPlaca(String cnpj, String placa) {
         Oficina oficina = localizarOficina(cnpj);
         return veiculoMapper.toDTO(buscarVeiculo(oficina, placa));
     }
 
+    /**
+     * Busca veículos pelo nome do cliente (paginado).
+     *
+     * @param cnpj     CNPJ da oficina
+     * @param nome     Nome (ou parte) do cliente
+     * @param pageable Informações de paginação
+     * @return Página de DTOs dos veículos encontrados
+     * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
+     * @throws VeiculoNaoLocalizadoException se nenhum veículo for encontrado
+     */
     public Page<VeiculoDTO> buscarVeiculosPorNomeCliente(
             String cnpj, String nome, Pageable pageable) {
 
@@ -141,18 +214,42 @@ public class VeiculoService {
         return veiculos.map(veiculoMapper::toDTO);
     }
 
+    /**
+     * Retorna todos os veículos da oficina (paginado).
+     *
+     * @param cnpj     CNPJ da oficina
+     * @param pageable Informações de paginação
+     * @return Página de DTOs dos veículos
+     * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
+     */
     public Page<VeiculoDTO> buscarTodos(String cnpj, Pageable pageable) {
         Oficina oficina = localizarOficina(cnpj);
         return veiculoRepository.findAllByOficina(oficina, pageable)
                 .map(veiculoMapper::toDTO);
     }
 
+    /**
+     * Retorna veículos ativos da oficina (paginado).
+     *
+     * @param cnpj     CNPJ da oficina
+     * @param pageable Informações de paginação
+     * @return Página de DTOs dos veículos ativos
+     * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
+     */
     public Page<VeiculoDTO> buscarVeiculosAtivos(String cnpj, Pageable pageable) {
         Oficina oficina = localizarOficina(cnpj);
         return veiculoRepository.findByAtivoAndOficina(true, oficina, pageable)
                 .map(veiculoMapper::toDTO);
     }
 
+    /**
+     * Retorna veículos inativos da oficina (paginado).
+     *
+     * @param cnpj     CNPJ da oficina
+     * @param pageable Informações de paginação
+     * @return Página de DTOs dos veículos inativos
+     * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
+     */
     public Page<VeiculoDTO> buscarVeiculosInativos(String cnpj, Pageable pageable) {
         Oficina oficina = localizarOficina(cnpj);
         return veiculoRepository.findByAtivoAndOficina(false, oficina, pageable)
@@ -165,24 +262,52 @@ public class VeiculoService {
      * ======================
      */
 
+    /**
+     * Valida se a placa informada não é nula ou vazia.
+     *
+     * @param placa Placa a ser validada
+     * @throws PlacaVaziaException se a placa for nula ou vazia
+     */
     private void validarPlacaVazia(String placa) {
         if (placa == null || placa.isBlank()) {
             throw new PlacaVaziaException("Placa não pode ser vazia");
         }
     }
 
+    /**
+     * Valida se já existe veículo com a mesma placa na oficina.
+     *
+     * @param oficina Oficina onde validar
+     * @param placa   Placa a ser validada
+     * @throws PlacaDuplicadaException se a placa já estiver cadastrada na oficina
+     */
     private void validarPlacaDuplicada(Oficina oficina, String placa) {
         if (veiculoRepository.existsByPlacaAndOficina(placa, oficina)) {
             throw new PlacaDuplicadaException("Placa já cadastrada");
         }
     }
 
+    /**
+     * Busca um veículo pela placa e oficina.
+     *
+     * @param oficina Oficina onde buscar
+     * @param placa   Placa do veículo
+     * @return Entidade Veiculo encontrada
+     * @throws VeiculoNaoLocalizadoException se o veículo não for encontrado
+     */
     private Veiculo buscarVeiculo(Oficina oficina, String placa) {
         return veiculoRepository.findByPlacaAndOficina(placa, oficina)
                 .orElseThrow(() ->
                         new VeiculoNaoLocalizadoException("Veículo não encontrado"));
     }
 
+    /**
+     * Localiza uma oficina pelo CNPJ.
+     *
+     * @param cnpj CNPJ da oficina
+     * @return Entidade Oficina encontrada
+     * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
+     */
     private Oficina localizarOficina(String cnpj) {
         return oficinaRepository.findByCnpj(cnpj)
                 .orElseThrow(() ->
