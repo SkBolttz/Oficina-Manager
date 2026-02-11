@@ -1,5 +1,10 @@
 package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.ClienteNaoLocalizadoException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Veiculo.PlacaDuplicadaException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Veiculo.PlacaVaziaException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Veiculo.VeiculoNaoLocalizadoException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -54,7 +59,7 @@ public class VeiculoService {
         Cliente cliente = clienteRepository
                 .findByCpfCnpjAndOficina(cpfCnpjCliente, oficina)
                 .orElseThrow(() ->
-                        new RecursoNaoEncontradoException("Cliente não encontrado"));
+                        new ClienteNaoLocalizadoException("Cliente não encontrado"));
 
         Veiculo veiculo = veiculoMapper.toEntity(dto);
         veiculo.setCliente(cliente);
@@ -130,7 +135,7 @@ public class VeiculoService {
                 .findByClienteNomeContainingIgnoreCaseAndOficina(nome, oficina, pageable);
 
         if (veiculos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Nenhum veículo encontrado");
+            throw new VeiculoNaoLocalizadoException("Nenhum veículo encontrado");
         }
 
         return veiculos.map(veiculoMapper::toDTO);
@@ -162,25 +167,25 @@ public class VeiculoService {
 
     private void validarPlacaVazia(String placa) {
         if (placa == null || placa.isBlank()) {
-            throw new RegraNegocioException("Placa não pode ser vazia");
+            throw new PlacaVaziaException("Placa não pode ser vazia");
         }
     }
 
     private void validarPlacaDuplicada(Oficina oficina, String placa) {
         if (veiculoRepository.existsByPlacaAndOficina(placa, oficina)) {
-            throw new RegraNegocioException("Placa já cadastrada");
+            throw new PlacaDuplicadaException("Placa já cadastrada");
         }
     }
 
     private Veiculo buscarVeiculo(Oficina oficina, String placa) {
         return veiculoRepository.findByPlacaAndOficina(placa, oficina)
                 .orElseThrow(() ->
-                        new RecursoNaoEncontradoException("Veículo não encontrado"));
+                        new VeiculoNaoLocalizadoException("Veículo não encontrado"));
     }
 
     private Oficina localizarOficina(String cnpj) {
         return oficinaRepository.findByCnpj(cnpj)
                 .orElseThrow(() ->
-                        new RegraNegocioException("Oficina não encontrada"));
+                        new OficinaNaoLocalizadaException("Oficina não encontrada"));
     }
 }
