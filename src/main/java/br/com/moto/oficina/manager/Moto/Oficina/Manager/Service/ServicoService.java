@@ -1,5 +1,8 @@
 package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.OS.ServicoNaoLocalizadoException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Servico.ServicoDuplicadoException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -111,7 +114,7 @@ public class ServicoService {
                 pageable);
 
         if (servicos.isEmpty()) {
-            throw new RecursoNaoEncontradoException("Nenhum serviço encontrado");
+            throw new ServicoNaoLocalizadoException("Nenhum serviço encontrado");
         }
 
         return servicos.map(servicoMapper::toDto);
@@ -143,9 +146,9 @@ public class ServicoService {
 
     private Oficina buscarOficina(String cnpj) {
         Oficina oficina = oficinaRepository.findByCnpj(cnpj)
-                .orElseThrow(() -> new RegraNegocioException("Oficina nao encontrada"));
+                .orElseThrow(() -> new OficinaNaoLocalizadaException("Oficina nao encontrada"));
         if (oficina == null) {
-            throw new RecursoNaoEncontradoException("Oficina não encontrada");
+            throw new OficinaNaoLocalizadaException("Oficina não encontrada");
         }
         return oficina;
     }
@@ -155,10 +158,10 @@ public class ServicoService {
         Oficina oficina = buscarOficina(cnpj);
 
         Servico servico = servicoRepository.findById(idServico)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Serviço não encontrado"));
+                .orElseThrow(() -> new ServicoNaoLocalizadoException("Serviço não encontrado"));
 
         if (!servico.getOficina().getId().equals(oficina.getId())) {
-            throw new RegraNegocioException("Serviço não pertence a esta oficina");
+            throw new ServicoNaoLocalizadoException("Serviço não pertence a esta oficina");
         }
 
         return servico;
@@ -166,7 +169,7 @@ public class ServicoService {
 
     private void validarDescricaoDuplicada(String descricao, Long idOficina) {
         if (servicoRepository.existsByDescricaoIgnoreCaseAndOficinaId(descricao, idOficina)) {
-            throw new RegraNegocioException("Já existe serviço cadastrado com esta descrição");
+            throw new ServicoDuplicadoException("Já existe serviço cadastrado com esta descrição");
         }
     }
 }
