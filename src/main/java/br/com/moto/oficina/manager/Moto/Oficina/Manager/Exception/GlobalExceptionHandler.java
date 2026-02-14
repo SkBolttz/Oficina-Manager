@@ -33,7 +33,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .contentType(MediaType.APPLICATION_JSON)
                                 .body(new ApiError(
                                                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                                                 "Erro interno do servidor",
@@ -46,7 +45,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                                 .status(HttpStatus.BAD_GATEWAY)
-                                .contentType(MediaType.APPLICATION_JSON)
                                 .body(new ApiError(
                                                 HttpStatus.BAD_GATEWAY.value(),
                                                 "Erro ao consultar a Receita Federal",
@@ -58,7 +56,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                                 .status(HttpStatus.NOT_FOUND)
-                                .contentType(MediaType.APPLICATION_JSON)
                                 .body(new ApiError(
                                                 HttpStatus.NOT_FOUND.value(),
                                                 "Cliente não localizado",
@@ -70,7 +67,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                                 .status(HttpStatus.CONFLICT)
-                                .contentType(MediaType.APPLICATION_JSON)
                                 .body(new ApiError(
                                                 HttpStatus.CONFLICT.value(),
                                                 "CPF/CNPJ duplicado",
@@ -82,7 +78,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                                 .status(HttpStatus.BAD_REQUEST)
-                                .contentType(MediaType.APPLICATION_JSON)
                                 .body(new ApiError(
                                                 HttpStatus.BAD_REQUEST.value(),
                                                 "CPF/CNPJ inválido",
@@ -94,7 +89,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                                 .status(HttpStatus.BAD_REQUEST)
-                                .contentType(MediaType.APPLICATION_JSON)
                                 .body(new ApiError(
                                                 HttpStatus.BAD_REQUEST.value(),
                                                 "CPF/CNPJ nulo",
@@ -106,7 +100,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                                 .status(HttpStatus.CONFLICT)
-                                .contentType(MediaType.APPLICATION_JSON)
                                 .body(new ApiError(
                                                 HttpStatus.CONFLICT.value(),
                                                 "Email duplicado",
@@ -118,7 +111,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.NOT_FOUND.value(),
                                 "Recurso não encontrado",
@@ -130,7 +122,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
                                 "Erro de regra de negócio",
@@ -142,7 +133,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.NOT_FOUND.value(),
                                 "CEP não localizado",
@@ -154,7 +144,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.CONFLICT.value(),
                                 "Código de item duplicado",
@@ -166,7 +155,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
                                 "Estoque insuficiente",
@@ -178,7 +166,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
                                 "Estoque nulo",
@@ -190,7 +177,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.NOT_FOUND.value(),
                                 "Item de estoque não localizado",
@@ -202,7 +188,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.NOT_FOUND.value(),
                                 "Funcionário não localizado",
@@ -214,7 +199,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
                                 "Erro de status do funcionário",
@@ -226,7 +210,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
                                 "CNPJ inválido",
@@ -238,7 +221,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.CONFLICT.value(),
                                 "CNPJ duplicado",
@@ -250,7 +232,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.NOT_FOUND.value(),
                                 "Oficina não localizada",
@@ -262,7 +243,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.NOT_FOUND.value(),
                                 "Ordem de serviço não localizada",
@@ -274,7 +254,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.NOT_FOUND.value(),
                                 "Produto não localizado",
@@ -286,7 +265,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
                                 "Quantidade de estoque inválida",
@@ -298,7 +276,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.CONFLICT.value(),
                                 "Serviço duplicado",
@@ -310,7 +287,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.NOT_FOUND.value(),
                                 "Serviço não localizado",
@@ -322,7 +298,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
                                 "Status da OS inválido",
@@ -334,7 +309,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
                                 "Status do produto inválido",
@@ -346,7 +320,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.CONFLICT.value(),
                                 "Serviço duplicado",
@@ -358,7 +331,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
                                 "Erro de senha",
@@ -370,7 +342,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.NOT_FOUND.value(),
                                 "Usuário não encontrado",
@@ -382,7 +353,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.CONFLICT.value(),
                                 "Placa duplicada",
@@ -394,7 +364,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.BAD_REQUEST.value(),
                                 "Placa vazia",
@@ -406,7 +375,6 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                         .status(HttpStatus.NOT_FOUND)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .body(new ApiError(
                                 HttpStatus.NOT_FOUND.value(),
                                 "Veículo não localizado",

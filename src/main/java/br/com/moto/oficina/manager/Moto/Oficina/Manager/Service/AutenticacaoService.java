@@ -3,6 +3,7 @@ package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.Usuario.NovaSenhaDTO;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Entity.Usuario;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Enum.Role.Role;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.CPFCNPJDuplicadoException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.CPFCNPJInvalidoException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Usuario.ErroSenhaException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Usuario.UsuarioNaoEncontradoException;
@@ -37,7 +38,6 @@ public class AutenticacaoService {
         user.setRole(Role.OFICINA);
         usuarioRepository.save(user);
 
-        System.out.println(senhaGerada); // Imprime a senha gerada no console para fins de teste
         return "Oficina cadastrada com sucesso, por favor, verifique o seu e-mail para obter a senha de acesso.";
     }
 
@@ -78,6 +78,4 @@ public class AutenticacaoService {
 
         return senha.toString();
     }
-
-
 }
