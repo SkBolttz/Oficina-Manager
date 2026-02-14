@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  coworking-app:
+    build: .
+    container_name: geficina-app
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/motogaragem
+      SPRING_DATASOURCE_USERNAME: henrique
+      SPRING_DATASOURCE_PASSWORD: 123

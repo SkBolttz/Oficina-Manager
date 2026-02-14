@@ -3,10 +3,12 @@ package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 
 import java.time.LocalDate;
 
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Entity.Usuario;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.API.ErroReceitaFederalException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.CNPJInvalidoException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.DuplicidadeCnpjException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Api.ReceitaWS;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.Oficina.AtualizarOficinaDTO;
@@ -31,6 +33,7 @@ public class OficinaService {
     private final OficinaMapper oficinaMapper;
     private final EnderecoMapper enderecoMapper;
     private final EnderecoService enderecoService;
+    private final UsuarioRepository usuarioRepository;
 
     /**
      * Construtor do serviço de oficina.
@@ -40,19 +43,22 @@ public class OficinaService {
      * @param oficinaMapper     Mapper para conversão entre DTO e entidade Oficina
      * @param enderecoMapper    Mapper para conversão entre DTO e entidade Endereco
      * @param enderecoService   Serviço de endereço
+     * @param usuarioRepository Repositório de usuários
      */
     public OficinaService(
             OficinaRepository oficinaRepository,
             ReceitaWS receitaWS,
             OficinaMapper oficinaMapper,
             EnderecoMapper enderecoMapper,
-            EnderecoService enderecoService) {
+            EnderecoService enderecoService,
+            UsuarioRepository usuarioRepository) {
 
         this.oficinaRepository = oficinaRepository;
         this.receitaWS = receitaWS;
         this.oficinaMapper = oficinaMapper;
         this.enderecoMapper = enderecoMapper;
         this.enderecoService = enderecoService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     /*
@@ -65,8 +71,8 @@ public class OficinaService {
      * Cadastra uma nova oficina.
      *
      * O método valida formato do CNPJ, verifica se já não existe uma oficina
-     * cadastrada com o mesmo CNPJ, consulta os dados na Receita Federal e persiste
-     * a oficina com endereço.
+     * cadastrada com o mesmo CNPJ, consulta os dados na Receita Federal, persiste
+     * a oficina com endereço e altera o status do primeiro login.
      *
      * @param dto DTO com os dados para cadastro
      * @throws CNPJInvalidoException       se o CNPJ estiver em formato inválido
@@ -92,6 +98,10 @@ public class OficinaService {
         oficina.setAtivo(true);
 
         oficinaRepository.save(oficina);
+
+        Usuario user = buscarUsuario(dto.cnpj());
+        user.setPrimeiroLogin(false);
+        usuarioRepository.save(user);
     }
 
     /*
@@ -243,5 +253,17 @@ public class OficinaService {
      */
     private String normalizarCnpj(String cnpj) {
         return cnpj.replaceAll("\\D", "");
+    }
+
+    /**
+     * Busca um usuário pelo CNPJ.
+     *
+     * @param cnpj CNPJ do usuário a ser buscado
+     * @return Usuario encontrado
+     * @throws RecursoNaoEncontradoException se o usuário não for encontrado
+     */
+    private Usuario buscarUsuario(String cnpj){
+        return usuarioRepository.findByCnpj(cnpj)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
     }
 }

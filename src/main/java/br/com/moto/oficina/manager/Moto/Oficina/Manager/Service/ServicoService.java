@@ -1,5 +1,4 @@
-java
-        package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
+package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.OS.ServicoNaoLocalizadoException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
