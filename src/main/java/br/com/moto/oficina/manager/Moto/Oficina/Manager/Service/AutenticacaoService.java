@@ -3,13 +3,10 @@ package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.Usuario.NovaSenhaDTO;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Entity.Usuario;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Enum.Role.Role;
-import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.CPFCNPJDuplicadoException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.CPFCNPJInvalidoException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Usuario.ErroSenhaException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Usuario.UsuarioNaoEncontradoException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Repository.UsuarioRepository;
-import ch.qos.logback.core.net.SyslogOutputStream;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
