@@ -31,10 +31,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/autenticacao/login", "/autenticacao/cadastro/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/autenticacao/login").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
                         .requestMatchers("/autenticacao/atualizar-senha/**").hasRole("OFICINA")
-                        //.requestMatchers("/autenticacao/cadastro/**").hasRole("ADMIN")
+                        .requestMatchers("/autenticacao/cadastro/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
 
