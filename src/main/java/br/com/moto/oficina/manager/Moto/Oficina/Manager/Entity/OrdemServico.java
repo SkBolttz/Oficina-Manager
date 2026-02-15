@@ -1,8 +1,10 @@
 package br.com.moto.oficina.manager.Moto.Oficina.Manager.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Enum.OrdemServico.FormaPagamento;
@@ -88,5 +90,8 @@ public class OrdemServico {
 
     @OneToMany(mappedBy = "ordemServico", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemEstoqueOS> produtos;
+
+    @NotNull
+    private LocalDate prazoEntrega;
 }
 

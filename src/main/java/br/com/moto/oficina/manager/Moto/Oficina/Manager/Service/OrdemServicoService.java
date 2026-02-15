@@ -96,6 +96,7 @@ public class OrdemServicoService {
         os.setDataAbertura(LocalDateTime.now());
         os.setStatus(Status.ABERTA);
         os.setAtivo(true);
+        os.setPrazoEntrega(dto.prazoEntrega());
         os.setDescricaoProblema(dto.descricaoProblema());
 
         // LISTAS MUTÁVEIS
