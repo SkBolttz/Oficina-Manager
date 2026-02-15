@@ -96,7 +96,7 @@ public class OrdemServicoService {
         os.setDataAbertura(LocalDateTime.now());
         os.setStatus(Status.ABERTA);
         os.setAtivo(true);
-        os.setPrazoEntrega(dto.prazoEntrega());
+        os.setPrazoEntrega(dto.prazoEntrega()); // Adição realizada para controle de prazo
         os.setDescricaoProblema(dto.descricaoProblema());
 
         // LISTAS MUTÁVEIS
