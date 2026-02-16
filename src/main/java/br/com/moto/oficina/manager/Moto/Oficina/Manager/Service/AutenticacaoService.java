@@ -7,6 +7,7 @@ import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.CPFCNP
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Usuario.ErroSenhaException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Usuario.UsuarioNaoEncontradoException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Repository.UsuarioRepository;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Util.ObterUsuarioLogado;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -39,9 +40,9 @@ public class AutenticacaoService {
         return "Oficina cadastrada com sucesso, por favor, verifique o seu e-mail para obter a senha de acesso.";
     }
 
-    public String atualizarSenhaPrimeiroAcesso(String cnpj, NovaSenhaDTO novaSenha) {
+    public String atualizarSenhaPrimeiroAcesso(NovaSenhaDTO novaSenha) {
 
-        Usuario usuario = usuarioRepository.findByCnpj(cnpj)
+        Usuario usuario = usuarioRepository.findByCnpj(ObterUsuarioLogado.obterCnpjUsuarioLogado())
                 .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
 
         if (!usuario.getPrimeiroLogin()) {

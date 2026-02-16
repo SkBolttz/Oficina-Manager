@@ -74,7 +74,7 @@ public class AutenticacaoController {
         return ResponseEntity.status(201).body(autenticacaoService.cadastrarUsuario(cnpj));
     }
 
-    @PutMapping("/atualizar-senha/{cnpj}")
+    @PutMapping("/atualizar-senha")
     @Operation(summary = "Atualizar senha no primeiro acesso", description = "Atualiza a senha do usuário no primeiro acesso.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Senha atualizada com sucesso", content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))),
@@ -84,9 +84,8 @@ public class AutenticacaoController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     public ResponseEntity<String> atualizarSenha(
-            @Parameter(description = "CNPJ do estabelecimento", required = true) @PathVariable String cnpj,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Nova senha", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = NovaSenhaDTO.class)))
             @RequestBody NovaSenhaDTO novaSenha){
-        return ResponseEntity.ok(autenticacaoService.atualizarSenhaPrimeiroAcesso(cnpj, novaSenha));
+        return ResponseEntity.ok(autenticacaoService.atualizarSenhaPrimeiroAcesso(novaSenha));
     }
 }
