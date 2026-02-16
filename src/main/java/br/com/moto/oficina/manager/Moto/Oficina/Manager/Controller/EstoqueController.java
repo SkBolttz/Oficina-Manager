@@ -40,7 +40,7 @@ public class EstoqueController {
         this.estoqueService = estoqueService;
     }
 
-    @PostMapping("/cadastrar/{cnpj}")
+    @PostMapping("/cadastrar")
     @Operation(summary = "Cadastrar item de estoque", description = "Cadastra um novo item no estoque para o estabelecimento informado pelo CNPJ.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Item cadastrado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = EstoqueDTO.class))),
@@ -51,13 +51,12 @@ public class EstoqueController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     public ResponseEntity<EstoqueDTO> cadastrarItemEstoque(
-            @Parameter(description = "CNPJ do estabelecimento", required = true) @PathVariable String cnpj,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Dados para cadastro do item de estoque", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = CadastroEstoqueDTO.class)))
             @RequestBody @Valid CadastroEstoqueDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(estoqueService.cadastrarItemEstoque(cnpj, dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(estoqueService.cadastrarItemEstoque(dto));
     }
 
-    @PutMapping("/atualizar/{cnpj}/{idItem}")
+    @PutMapping("/atualizar")
     @Operation(summary = "Atualizar item de estoque", description = "Atualiza os dados de um item de estoque identificado pelo id para o estabelecimento informado.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Item atualizado com sucesso", content = @Content(mediaType = "application/json", schema = @Schema(implementation = EstoqueDTO.class))),
@@ -68,14 +67,12 @@ public class EstoqueController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     public ResponseEntity<EstoqueDTO> atualizarItemEstoque(
-            @Parameter(description = "CNPJ do estabelecimento", required = true) @PathVariable String cnpj,
-            @Parameter(description = "ID do item de estoque", required = true) @PathVariable Long idItem,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Dados para atualização do item de estoque", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = AtualizarEstoqueDTO.class)))
             @RequestBody @Valid AtualizarEstoqueDTO dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(estoqueService.atualizarItemEstoque(cnpj, idItem, dto));
+        return ResponseEntity.status(HttpStatus.OK).body(estoqueService.atualizarItemEstoque(dto));
     }
 
-    @PatchMapping("/ativar/{cnpj}/{idItem}")
+    @PatchMapping("/ativar/{idItem}")
     @Operation(summary = "Ativar item de estoque", description = "Ativa um item de estoque inativo identificado pelo id.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "202", description = "Ativação aceita", content = @Content(mediaType = "application/json", schema = @Schema(implementation = EstoqueDTO.class))),
@@ -86,12 +83,11 @@ public class EstoqueController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     public ResponseEntity<EstoqueDTO> ativarItemEstoque(
-            @Parameter(description = "CNPJ do estabelecimento", required = true) @PathVariable String cnpj,
             @Parameter(description = "ID do item de estoque", required = true) @PathVariable Long idItem) {
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(estoqueService.ativarItemEstoque(cnpj, idItem));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(estoqueService.ativarItemEstoque(idItem));
     }
 
-    @PatchMapping("/desativar/{cnpj}/{idItem}")
+    @PatchMapping("/desativar/{idItem}")
     @Operation(summary = "Desativar item de estoque", description = "Desativa um item de estoque ativo identificado pelo id.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "202", description = "Desativação aceita", content = @Content(mediaType = "application/json", schema = @Schema(implementation = EstoqueDTO.class))),
@@ -102,12 +98,11 @@ public class EstoqueController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     public ResponseEntity<EstoqueDTO> desativarItemEstoque(
-            @Parameter(description = "CNPJ do estabelecimento", required = true) @PathVariable String cnpj,
             @Parameter(description = "ID do item de estoque", required = true) @PathVariable Long idItem) {
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(estoqueService.desativarItemEstoque(cnpj, idItem));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(estoqueService.desativarItemEstoque(idItem));
     }
 
-    @GetMapping("/buscar/{cnpj}/codigo/{codigoItem}")
+    @GetMapping("/buscar/codigo/{codigoItem}")
     @Operation(summary = "Buscar item por código", description = "Retorna o item de estoque correspondente ao código informado.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Item encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = EstoqueDTO.class))),
@@ -118,12 +113,11 @@ public class EstoqueController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     public ResponseEntity<EstoqueDTO> buscarItemEstoque(
-            @Parameter(description = "CNPJ do estabelecimento", required = true) @PathVariable String cnpj,
             @Parameter(description = "Código do item", required = true) @PathVariable String codigoItem) {
-        return ResponseEntity.status(HttpStatus.OK).body(estoqueService.buscarItemEstoque(cnpj, codigoItem));
+        return ResponseEntity.status(HttpStatus.OK).body(estoqueService.buscarItemEstoque(codigoItem));
     }
 
-    @GetMapping("/buscar/{cnpj}/nome/{nome}")
+    @GetMapping("/buscar/nome/{nome}")
     @Operation(summary = "Buscar itens por nome", description = "Busca itens de estoque pelo nome com paginação.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Itens encontrados", content = @Content(mediaType = "application/json", schema = @Schema(implementation = EstoqueDTO.class))),
@@ -134,13 +128,12 @@ public class EstoqueController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     public ResponseEntity<Page<EstoqueDTO>> buscarItemEstoquePorNome(
-            @Parameter(description = "CNPJ do estabelecimento", required = true) @PathVariable String cnpj,
             @Parameter(description = "Nome (ou parte) do item", required = true) @PathVariable String nome,
             @PageableDefault(page = 0, size = 20, sort = "descricao") Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(estoqueService.buscarItemEstoquePorNome(cnpj, nome, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(estoqueService.buscarItemEstoquePorNome(nome, pageable));
     }
 
-    @GetMapping("/buscar/{cnpj}/ativos")
+    @GetMapping("/buscar/ativos")
     @Operation(summary = "Buscar itens ativos", description = "Retorna itens de estoque ativos (paginado) do estabelecimento.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Itens ativos retornados", content = @Content(mediaType = "application/json", schema = @Schema(implementation = EstoqueDTO.class))),
@@ -151,12 +144,11 @@ public class EstoqueController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     public ResponseEntity<Page<EstoqueDTO>> buscarItensEstoqueAtivos(
-            @Parameter(description = "CNPJ do estabelecimento", required = true) @PathVariable String cnpj,
             @PageableDefault(page = 0, size = 20, sort = "descricao") Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(estoqueService.buscarItensEstoqueAtivos(cnpj, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(estoqueService.buscarItensEstoqueAtivos(pageable));
     }
 
-    @GetMapping("/buscar/{cnpj}/inativos")
+    @GetMapping("/buscar/inativos")
     @Operation(summary = "Buscar itens inativos", description = "Retorna itens de estoque inativos (paginado) do estabelecimento.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Itens inativos retornados", content = @Content(mediaType = "application/json", schema = @Schema(implementation = EstoqueDTO.class))),
@@ -167,12 +159,11 @@ public class EstoqueController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     public ResponseEntity<Page<EstoqueDTO>> buscarItensEstoqueInativos(
-            @Parameter(description = "CNPJ do estabelecimento", required = true) @PathVariable String cnpj,
             @PageableDefault(page = 0, size = 20, sort = "descricao") Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(estoqueService.buscarItensEstoqueInativos(cnpj, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(estoqueService.buscarItensEstoqueInativos(pageable));
     }
 
-    @GetMapping("/buscar/{cnpj}")
+    @GetMapping("/buscar")
     @Operation(summary = "Buscar todos os itens de estoque", description = "Retorna todos os itens de estoque (paginado) do estabelecimento.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Itens retornados", content = @Content(mediaType = "application/json", schema = @Schema(implementation = EstoqueDTO.class))),
@@ -183,8 +174,7 @@ public class EstoqueController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     public ResponseEntity<Page<EstoqueDTO>> buscarTodosItensEstoque(
-            @Parameter(description = "CNPJ do estabelecimento", required = true) @PathVariable String cnpj,
             @PageableDefault(page = 0, size = 20, sort = "descricao") Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(estoqueService.buscarTodosItens(cnpj, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(estoqueService.buscarTodosItens(pageable));
     }
 }

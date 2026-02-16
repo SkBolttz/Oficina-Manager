@@ -2,10 +2,10 @@ package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 
 import java.time.LocalDate;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Estoque.CodigoItemDuplicadoException;
-import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Estoque.EstoqueInsuficienteException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Estoque.EstoqueNuloException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Estoque.ItemEstoqueNaoLocalizadoException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Util.ObterUsuarioLogado;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -50,14 +50,13 @@ public class EstoqueService {
     /**
      * Cadastra um novo item de estoque para a oficina informada.
      *
-     * @param cnpj CNPJ da oficina
      * @param dto  DTO com os dados do item de estoque
      * @return DTO do item cadastrado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws CodigoItemDuplicadoException  se já existir item com o mesmo código na oficina
      */
-    public EstoqueDTO cadastrarItemEstoque(String cnpj, CadastroEstoqueDTO dto) {
-        Oficina oficina = localizarOficina(cnpj);
+    public EstoqueDTO cadastrarItemEstoque(CadastroEstoqueDTO dto) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         validarDuplicidade(dto.codigo(), oficina);
 
         Estoque itemEstoque = estoqueMapper.toEntity(dto);
@@ -80,17 +79,15 @@ public class EstoqueService {
     /**
      * Atualiza um item de estoque existente.
      *
-     * @param cnpj   CNPJ da oficina
-     * @param idItem Identificador do item de estoque
      * @param dto    DTO com os campos a serem atualizados (campos nulos são ignorados)
      * @return DTO do item atualizado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws ItemEstoqueNaoLocalizadoException se o item não for localizado
      * @throws EstoqueNuloException se o valor de estoque atual for negativo
      */
-    public EstoqueDTO atualizarItemEstoque(String cnpj, Long idItem, AtualizarEstoqueDTO dto) {
-        Oficina oficina = localizarOficina(cnpj);
-        Estoque itemEstoque = localizarItemEstoque(idItem, oficina);
+    public EstoqueDTO atualizarItemEstoque(AtualizarEstoqueDTO dto) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
+        Estoque itemEstoque = localizarItemEstoque(dto.idItem(), oficina);
 
         itemEstoque.setDescricao(dto.descricao() == null ? itemEstoque.getDescricao() : dto.descricao());
         itemEstoque.setCodigo(dto.codigo() == null ? itemEstoque.getCodigo() : dto.codigo());
@@ -107,7 +104,7 @@ public class EstoqueService {
             throw new EstoqueNuloException("Estoque atual nao pode ser negativo");
         } else {
             itemEstoque
-                    .setEstoqueAtual(dto.estoqueAtual() == null ? itemEstoque.getEstoqueAtual() : dto.estoqueAtual());
+                    .setEstoqueAtual(dto.estoqueAtual() == 0 ? itemEstoque.getEstoqueAtual() : dto.estoqueAtual());
         }
 
         if (dto.estoqueAtual() > itemEstoque.getEstoqueAtual()) {
@@ -127,14 +124,13 @@ public class EstoqueService {
     /**
      * Ativa um item de estoque.
      *
-     * @param cnpj   CNPJ da oficina
      * @param idItem Identificador do item
      * @return DTO do item ativado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws ItemEstoqueNaoLocalizadoException se o item não for localizado
      */
-    public EstoqueDTO ativarItemEstoque(String cnpj, Long idItem) {
-        Oficina oficina = localizarOficina(cnpj);
+    public EstoqueDTO ativarItemEstoque(Long idItem) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Estoque itemEstoque = localizarItemEstoque(idItem, oficina);
         itemEstoque.setAtivo(true);
         estoqueRepository.save(itemEstoque);
@@ -144,14 +140,13 @@ public class EstoqueService {
     /**
      * Desativa um item de estoque.
      *
-     * @param cnpj   CNPJ da oficina
      * @param idItem Identificador do item
      * @return DTO do item desativado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws ItemEstoqueNaoLocalizadoException se o item não for localizado
      */
-    public EstoqueDTO desativarItemEstoque(String cnpj, Long idItem) {
-        Oficina oficina = localizarOficina(cnpj);
+    public EstoqueDTO desativarItemEstoque(Long idItem) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Estoque itemEstoque = localizarItemEstoque(idItem, oficina);
         itemEstoque.setAtivo(false);
         estoqueRepository.save(itemEstoque);
@@ -167,14 +162,13 @@ public class EstoqueService {
     /**
      * Busca um item de estoque pelo código.
      *
-     * @param cnpj       CNPJ da oficina
      * @param codigoItem Código do item
      * @return DTO do item encontrado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws ItemEstoqueNaoLocalizadoException se o item não for localizado
      */
-    public EstoqueDTO buscarItemEstoque(String cnpj, String codigoItem) {
-        Oficina oficina = localizarOficina(cnpj);
+    public EstoqueDTO buscarItemEstoque(String codigoItem) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
 
         Estoque itemEstoque = localizarItemCodigo(codigoItem, oficina);
         return estoqueMapper.toDTO(itemEstoque);
@@ -183,15 +177,14 @@ public class EstoqueService {
     /**
      * Busca itens de estoque por nome (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param nomeItem Termo a ser buscado na descrição
      * @param pageable Informações de paginação
      * @return Página de DTOs dos itens que correspondem ao critério
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws ItemEstoqueNaoLocalizadoException se nenhum item for encontrado
      */
-    public Page<EstoqueDTO> buscarItemEstoquePorNome(String cnpj, String nomeItem, Pageable pageable) {
-        Oficina oficina = localizarOficina(cnpj);
+    public Page<EstoqueDTO> buscarItemEstoquePorNome(String nomeItem, Pageable pageable) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Page<Estoque> itensEstoque = estoqueRepository.findByDescricaoContainingIgnoreCaseAndOficina(nomeItem, oficina,
                 pageable);
 
@@ -205,13 +198,12 @@ public class EstoqueService {
     /**
      * Retorna itens de estoque ativos (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param pageable Informações de paginação
      * @return Página de DTOs dos itens ativos
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public Page<EstoqueDTO> buscarItensEstoqueAtivos(String cnpj, Pageable pageable) {
-        Oficina oficina = localizarOficina(cnpj);
+    public Page<EstoqueDTO> buscarItensEstoqueAtivos(Pageable pageable) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Page<Estoque> itensEstoqueAtivos = estoqueRepository.findByAtivoAndOficina(true, oficina, pageable);
         return itensEstoqueAtivos.map(estoqueMapper::toDTO);
     }
@@ -219,13 +211,12 @@ public class EstoqueService {
     /**
      * Retorna itens de estoque inativos (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param pageable Informações de paginação
      * @return Página de DTOs dos itens inativos
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public Page<EstoqueDTO> buscarItensEstoqueInativos(String cnpj, Pageable pageable) {
-        Oficina oficina = localizarOficina(cnpj);
+    public Page<EstoqueDTO> buscarItensEstoqueInativos(Pageable pageable) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Page<Estoque> itensEstoqueInativos = estoqueRepository.findByAtivoAndOficina(false, oficina, pageable);
         return itensEstoqueInativos.map(estoqueMapper::toDTO);
     }
@@ -233,46 +224,14 @@ public class EstoqueService {
     /**
      * Retorna todos os itens de estoque da oficina (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param pageable Informações de paginação
      * @return Página de DTOs dos itens
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public Page<EstoqueDTO> buscarTodosItens(String cnpj, Pageable pageable) {
-        Oficina oficina = localizarOficina(cnpj);
+    public Page<EstoqueDTO> buscarTodosItens(Pageable pageable) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Page<Estoque> itensEstoque = estoqueRepository.findByOficina(oficina, pageable);
         return itensEstoque.map(estoqueMapper::toDTO);
-    }
-
-    /*
-     * ======================
-     * Regra para Ajustes em Quantidade
-     * ======================
-     */
-
-    /**
-     * Ajusta a quantidade de um item de estoque (positivo para entrada, negativo para saída).
-     *
-     * @param cnpj    CNPJ da oficina
-     * @param idItem  Identificador do item
-     * @param quantidade Quantidade a ajustar (pode ser negativa)
-     * @return DTO do item após ajuste
-     * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
-     * @throws ItemEstoqueNaoLocalizadoException se o item não for localizado
-     * @throws EstoqueInsuficienteException se o ajuste resultar em quantidade negativa
-     */
-    public EstoqueDTO ajustarQuantidadeItemEstoque(String cnpj, Long idItem, int quantidade) {
-        Oficina oficina = localizarOficina(cnpj);
-        Estoque item = localizarItemEstoque(idItem, oficina);
-
-        int novaQuantidade = item.getEstoqueAtual() + quantidade;
-        if (novaQuantidade < 0) {
-            throw new EstoqueInsuficienteException("Quantidade insuficiente em estoque");
-        }
-
-        item.setEstoqueAtual(novaQuantidade);
-        estoqueRepository.save(item);
-        return estoqueMapper.toDTO(item);
     }
 
     /*
@@ -280,20 +239,6 @@ public class EstoqueService {
      * Regra para identificação de Estoque baixo
      * ======================
      */
-
-    /**
-     * Lista itens com estoque abaixo do mínimo (paginado).
-     *
-     * @param cnpj     CNPJ da oficina
-     * @param pageable Informações de paginação
-     * @return Página de DTOs dos itens com estoque baixo
-     * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
-     */
-    public Page<EstoqueDTO> itensEstoqueBaixo(String cnpj, Pageable pageable) {
-        Oficina oficina = localizarOficina(cnpj);
-        Page<Estoque> itens = estoqueRepository.buscarItensAbaixoDoMinimo(oficina, pageable);
-        return itens.map(estoqueMapper::toDTO);
-    }
 
     /*
      * ======================
@@ -309,10 +254,9 @@ public class EstoqueService {
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
     private Oficina localizarOficina(String cnpj) {
-        Oficina oficina = oficinaRepository.findByCnpj(cnpj)
+        return oficinaRepository.findByCnpj(cnpj)
                 .orElseThrow(() -> new OficinaNaoLocalizadaException("Oficina não encontrada"));
 
-        return oficina;
     }
 
     /**
@@ -351,8 +295,7 @@ public class EstoqueService {
      * @throws ItemEstoqueNaoLocalizadoException se o item não for encontrado
      */
     private Estoque localizarItemCodigo(String codigoItem, Oficina oficina ) {
-        Estoque itemEstoque = estoqueRepository.findByCodigoAndOficina(codigoItem, oficina)
+        return estoqueRepository.findByCodigoAndOficina(codigoItem, oficina)
                 .orElseThrow(() -> new ItemEstoqueNaoLocalizadoException("Item de estoque não encontrado"));
-        return itemEstoque;
     }
 }

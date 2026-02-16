@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Enum.Estoque.UnidadeMedida;
 
 public record AtualizarEstoqueDTO(
+    Long idItem,
     String descricao,
     String codigo,
     BigDecimal precoCompra,
