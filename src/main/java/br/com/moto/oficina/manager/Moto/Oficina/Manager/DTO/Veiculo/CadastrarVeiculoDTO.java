@@ -6,6 +6,7 @@ import br.com.moto.oficina.manager.Moto.Oficina.Manager.Enum.Veiculo.TipoCombust
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Enum.Veiculo.TipoVeiculo;
 
 public record CadastrarVeiculoDTO(
+        String cnpjCpf,
         String placa,
         MarcaMoto marca,
         ModeloMoto modelo,
