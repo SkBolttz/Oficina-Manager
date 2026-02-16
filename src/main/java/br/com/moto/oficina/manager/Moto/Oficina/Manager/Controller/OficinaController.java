@@ -1,5 +1,6 @@
 package br.com.moto.oficina.manager.Moto.Oficina.Manager.Controller;
 
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Util.ObterUsuarioLogado;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,10 +58,10 @@ public class OficinaController {
         oficinaService.cadastrarOficina(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Oficina com o CNPJ " + dto.cnpj() + " cadastrada com sucesso!");
+                .body("Oficina com o CNPJ " + ObterUsuarioLogado.obterCnpjUsuarioLogado() + " cadastrada com sucesso!");
     }
 
-    @PutMapping("/atualizar/{cnpj}")
+    @PutMapping("/atualizar")
     @Operation(summary = "Atualizar oficina",
             description = "Atualiza os dados de uma oficina identificada pelo CNPJ.")
     @ApiResponses(value = {
@@ -71,8 +72,6 @@ public class OficinaController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     public ResponseEntity<String> atualizarOficina(
-            @Parameter(description = "CNPJ da oficina", required = true)
-            @PathVariable String cnpj,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Dados para atualização da oficina",
                     required = true,
@@ -80,13 +79,13 @@ public class OficinaController {
                             schema = @Schema(implementation = AtualizarOficinaDTO.class)))
             @RequestBody AtualizarOficinaDTO dto) {
 
-        oficinaService.atualizarDadosOficina(cnpj, dto);
+        oficinaService.atualizarDadosOficina(dto);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body("Oficina atualizada com sucesso!");
     }
 
-    @GetMapping("/localizar/{cnpj}")
+    @GetMapping("/localizar")
     @Operation(summary = "Localizar oficina",
             description = "Retorna os dados da oficina cadastrada no sistema pelo CNPJ informado.")
     @ApiResponses(value = {
@@ -96,15 +95,13 @@ public class OficinaController {
             @ApiResponse(responseCode = "404", description = "Oficina não encontrada", content = @Content),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
-    public ResponseEntity<OficinaBuscaDTO> localizarOficina(
-            @Parameter(description = "CNPJ da oficina", required = true)
-            @PathVariable String cnpj) {
+    public ResponseEntity<OficinaBuscaDTO> localizarOficina() {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(oficinaService.localizarOficina(cnpj));
+                .body(oficinaService.localizarOficina());
     }
 
-    @GetMapping("/localizar/receita/{cnpj}")
+    @GetMapping("/localizar/receita")
     @Operation(summary = "Consultar CNPJ na Receita Federal",
             description = "Consulta os dados da oficina diretamente na API da Receita Federal pelo CNPJ informado.")
     @ApiResponses(value = {
@@ -114,11 +111,9 @@ public class OficinaController {
             @ApiResponse(responseCode = "404", description = "CNPJ não encontrado na Receita", content = @Content),
             @ApiResponse(responseCode = "500", description = "Erro ao consultar serviço externo", content = @Content)
     })
-    public ResponseEntity<OficinaDTO> localizarOficinaReceita(
-            @Parameter(description = "CNPJ para consulta na Receita Federal", required = true)
-            @PathVariable String cnpj) {
+    public ResponseEntity<OficinaDTO> localizarOficinaReceita() {
 
-        OficinaDTO oficina = receitaWS.buscarCnpj(cnpj);
+        OficinaDTO oficina = receitaWS.buscarCnpj();
 
         return ResponseEntity.status(HttpStatus.OK).body(oficina);
     }

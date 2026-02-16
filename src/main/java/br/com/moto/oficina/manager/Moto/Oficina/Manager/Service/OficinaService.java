@@ -82,12 +82,12 @@ public class OficinaService {
      */
     public void cadastrarOficina(CadastrarOficinaDTO dto) {
 
-        String cnpjNormalizado = normalizarCnpj(dto.cnpj());
+        String cnpjNormalizado = normalizarCnpj(ObterUsuarioLogado.obterCnpjUsuarioLogado());
 
         validarFormatoCnpj(cnpjNormalizado);
         validarCnpjNaoCadastrado(cnpjNormalizado);
 
-        OficinaDTO dadosReceita = consultarCnpj(cnpjNormalizado);
+        OficinaDTO dadosReceita = consultarCnpj();
         Oficina oficina = oficinaMapper.toEntity(dadosReceita);
 
         Endereco endereco = enderecoService
@@ -100,7 +100,7 @@ public class OficinaService {
 
         oficinaRepository.save(oficina);
 
-        Usuario user = buscarUsuario(dto.cnpj());
+        Usuario user = buscarUsuario(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         user.setPrimeiroLogin(false);
         usuarioRepository.save(user);
     }
@@ -117,14 +117,13 @@ public class OficinaService {
      * Campos nulos no DTO são ignorados. Se o DTO contiver informação de endereço,
      * o serviço de endereço é utilizado para atualizar o endereço da oficina.
      *
-     * @param cnpj CNPJ da oficina a ser atualizada
      * @param dto  DTO com os campos a serem atualizados
      * @throws CNPJInvalidoException         se o CNPJ informado estiver em formato inválido
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public void atualizarDadosOficina(String cnpj, AtualizarOficinaDTO dto) {
+    public void atualizarDadosOficina(AtualizarOficinaDTO dto) {
 
-        String cnpjNormalizado = normalizarCnpj(cnpj);
+        String cnpjNormalizado = normalizarCnpj(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         validarFormatoCnpj(cnpjNormalizado);
 
         Oficina oficina = oficinaRepository
@@ -174,14 +173,13 @@ public class OficinaService {
      *
      * O CNPJ é normalizado e validado antes da busca.
      *
-     * @param cnpj CNPJ da oficina (pode conter formatação)
      * @return DTO de busca da oficina localizada
      * @throws CNPJInvalidoException         se o CNPJ estiver em formato inválido
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public OficinaBuscaDTO localizarOficina(String cnpj) {
+    public OficinaBuscaDTO localizarOficina() {
 
-        String cnpjNormalizado = normalizarCnpj(cnpj);
+        String cnpjNormalizado = normalizarCnpj(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         validarFormatoCnpj(cnpjNormalizado);
 
         Oficina oficina = oficinaRepository
@@ -200,14 +198,13 @@ public class OficinaService {
     /**
      * Consulta os dados da Receita Federal para o CNPJ informado.
      *
-     * @param cnpjNormalizado CNPJ já normalizado (apenas dígitos)
      * @return DTO com os dados retornados pela Receita Federal
      * @throws CNPJInvalidoException       se a Receita não retornar dados válidos para o CNPJ
      * @throws ErroReceitaFederalException se ocorrer erro na comunicação com a Receita Federal
      */
-    private OficinaDTO consultarCnpj(String cnpjNormalizado) {
+    private OficinaDTO consultarCnpj() {
         try {
-            OficinaDTO oficina = receitaWS.buscarCnpj(cnpjNormalizado);
+            OficinaDTO oficina = receitaWS.buscarCnpj();
 
             if (oficina == null) {
                 throw new CNPJInvalidoException("CNPJ não encontrado na Receita Federal");

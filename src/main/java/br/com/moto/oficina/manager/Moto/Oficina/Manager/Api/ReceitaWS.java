@@ -1,5 +1,6 @@
 package br.com.moto.oficina.manager.Moto.Oficina.Manager.Api;
 
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Util.ObterUsuarioLogado;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.Oficina.OficinaDTO;
@@ -17,9 +18,9 @@ public class ReceitaWS {
                 .build();
     }
 
-    public OficinaDTO buscarCnpj(String cnpj) {
+    public OficinaDTO buscarCnpj() {
         return webClient.get()
-                .uri("/{cnpj}", cnpj)
+                .uri("/{cnpj}", ObterUsuarioLogado.obterCnpjUsuarioLogado())
                 .retrieve()
                 .bodyToMono(OficinaDTO.class)
                 .block();  // ou use Mono para reatividade total

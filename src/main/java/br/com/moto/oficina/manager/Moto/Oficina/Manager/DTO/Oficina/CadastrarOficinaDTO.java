@@ -3,7 +3,6 @@ package br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.Oficina;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.Endereco.EnderecoDTO;
 
 public record CadastrarOficinaDTO (
-    String cnpj,
     String razaoSocial,
     String situacao,
     String dataAbertura,
