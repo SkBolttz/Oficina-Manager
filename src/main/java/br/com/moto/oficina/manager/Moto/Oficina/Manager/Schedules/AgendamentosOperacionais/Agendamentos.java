@@ -31,6 +31,15 @@ public class Agendamentos {
         });
     }
 
+    @Scheduled(cron = "0 0 7 * * *")
+    public void limpezaOSAberta(){
+
+        List<OrdemServico> osAbertas = ordemServicoRepository.findByStatusAndDataAberturaBefore(
+                Status.ABERTA,
+                LocalDateTime.now().minusDays(30)
+        );
+    }
+
     private List<Status> statusOS(){
         return List.of(
                 Status.ABERTA,

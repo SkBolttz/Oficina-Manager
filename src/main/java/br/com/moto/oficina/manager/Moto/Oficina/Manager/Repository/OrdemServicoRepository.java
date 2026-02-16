@@ -27,4 +27,6 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
     Page<OrdemServico> findByOficinaAndFuncionarioResponsavelAndStatus(Oficina oficina, Funcionario funcionario, Status status, Pageable pageable);
 
     List<OrdemServico> findByStatusInAndPrazoEntregaBefore(List<Status> status, LocalDateTime localDateTime);
+
+    List<OrdemServico> findByStatusAndDataAberturaBefore(Status status, LocalDateTime localDateTime);
 }
