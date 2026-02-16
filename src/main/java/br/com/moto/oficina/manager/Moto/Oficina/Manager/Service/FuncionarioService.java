@@ -6,6 +6,7 @@ import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.*;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Funcionario.FuncionarioNaoLocalizadoException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Funcionario.FuncionarioStatusException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Util.ObterUsuarioLogado;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -58,7 +59,6 @@ public class FuncionarioService {
     /**
      * Cadastra um novo funcionário vinculado a uma oficina.
      *
-     * @param cnpj CNPJ da oficina
      * @param dto  DTO com os dados do funcionário
      * @return DTO do funcionário cadastrado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
@@ -67,9 +67,9 @@ public class FuncionarioService {
      * @throws CPFCNPJNuloException          se o CPF informado for nulo
      * @throws CPFCNPJInvalidoException      se o CPF informado for inválido
      */
-    public FuncionarioDTO cadastrarFuncionario(String cnpj, CadastrarFuncionarioDTO dto) {
+    public FuncionarioDTO cadastrarFuncionario(CadastrarFuncionarioDTO dto) {
 
-        Oficina oficina = localizarOficina(cnpj);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
 
         String cpfNormalizado = normalizarCpf(dto.cpf());
 
@@ -100,19 +100,16 @@ public class FuncionarioService {
 
     /**
      * Atualiza um funcionário existente.
-     *
-     * @param cnpj CNPJ da oficina
-     * @param cpf  CPF do funcionário a ser atualizado
      * @param dto  DTO com os campos a serem atualizados (campos nulos são ignorados)
      * @return DTO do funcionário atualizado
      * @throws OficinaNaoLocalizadaException   se a oficina não for encontrada
      * @throws FuncionarioNaoLocalizadoException se o funcionário não for localizado
      */
-    public FuncionarioDTO atualizarFuncionario(String cnpj, String cpf, AtualizarFuncionarioDTO dto) {
+    public FuncionarioDTO atualizarFuncionario(AtualizarFuncionarioDTO dto) {
 
-        Oficina oficina = localizarOficina(cnpj);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
 
-        Funcionario funcionario = localizarFuncionario(oficina, cpf);
+        Funcionario funcionario = localizarFuncionario(oficina, dto.cpfFuncionario());
 
         if (dto.nome() != null) {
             funcionario.setNome(dto.nome());
@@ -127,7 +124,7 @@ public class FuncionarioService {
             funcionario.setCargo(dto.cargo());
         }
         if (dto.endereco() != null) {
-            enderecoService.atualizarEnderecoFuncionario(cnpj, funcionario, dto.endereco());
+            enderecoService.atualizarEnderecoFuncionario(ObterUsuarioLogado.obterCnpjUsuarioLogado(), funcionario, dto.endereco());
         }
 
         funcionarioRepository.save(funcionario);
@@ -144,15 +141,14 @@ public class FuncionarioService {
     /**
      * Ativa um funcionário.
      *
-     * @param cnpj CNPJ da oficina
      * @param cpf  CPF do funcionário a ser ativado
      * @return DTO do funcionário ativado
      * @throws OficinaNaoLocalizadaException   se a oficina não for encontrada
      * @throws FuncionarioNaoLocalizadoException se o funcionário não for localizado
      * @throws FuncionarioStatusException      se o funcionário já estiver ativo
      */
-    public FuncionarioDTO ativarFuncionario(String cnpj, String cpf) {
-        Oficina oficina = localizarOficina(cnpj);
+    public FuncionarioDTO ativarFuncionario(String cpf) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Funcionario funcionario = localizarFuncionario(oficina, cpf);
 
         if (funcionario.getAtivo() == true) {
@@ -168,15 +164,14 @@ public class FuncionarioService {
     /**
      * Inativa um funcionário.
      *
-     * @param cnpj CNPJ da oficina
      * @param cpf  CPF do funcionário a ser inativado
      * @return DTO do funcionário inativado
      * @throws OficinaNaoLocalizadaException   se a oficina não for encontrada
      * @throws FuncionarioNaoLocalizadoException se o funcionário não for localizado
      * @throws FuncionarioStatusException      se o funcionário já estiver inativo
      */
-    public FuncionarioDTO inativarFuncionario(String cnpj, String cpf) {
-        Oficina oficina = localizarOficina(cnpj);
+    public FuncionarioDTO inativarFuncionario(String cpf) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Funcionario funcionario = localizarFuncionario(oficina, cpf);
 
         if (funcionario.getAtivo() == false) {
@@ -198,14 +193,13 @@ public class FuncionarioService {
     /**
      * Busca um funcionário por CPF.
      *
-     * @param cnpj CNPJ da oficina
      * @param cpf  CPF do funcionário
      * @return DTO do funcionário encontrado
      * @throws OficinaNaoLocalizadaException   se a oficina não for encontrada
      * @throws FuncionarioNaoLocalizadoException se o funcionário não for localizado
      */
-    public FuncionarioDTO buscarFuncionarioPorCPF(String cnpj, String cpf) {
-        Oficina oficina = localizarOficina(cnpj);
+    public FuncionarioDTO buscarFuncionarioPorCPF(String cpf) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Funcionario funcionario = localizarFuncionario(oficina, cpf);
 
         return funcionarioMapper.toResponseDTO(funcionario);
@@ -214,15 +208,14 @@ public class FuncionarioService {
     /**
      * Busca funcionários por nome (paginado).
      *
-     * @param cnpj            CNPJ da oficina
      * @param nomeFuncionario Termo a ser buscado no nome do funcionário
      * @param pageable        Informações de paginação
      * @return Página de DTOs dos funcionários que correspondem ao critério
      * @throws OficinaNaoLocalizadaException   se a oficina não for encontrada
      * @throws FuncionarioNaoLocalizadoException se nenhum funcionário for encontrado
      */
-    public Page<FuncionarioDTO> buscarFuncionarioPorNome(String cnpj, String nomeFuncionario, Pageable pageable) {
-        Oficina oficina = localizarOficina(cnpj);
+    public Page<FuncionarioDTO> buscarFuncionarioPorNome(String nomeFuncionario, Pageable pageable) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Page<Funcionario> funcionarios = funcionarioRepository.findByNomeContainingIgnoreCaseAndOficina(nomeFuncionario,
                 oficina, pageable);
 
@@ -236,13 +229,12 @@ public class FuncionarioService {
     /**
      * Retorna todos os funcionários da oficina (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param pageable Informações de paginação
      * @return Página de DTOs dos funcionários
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public Page<FuncionarioDTO> buscarTodosFuncionarios(String cnpj, Pageable pageable) {
-        Oficina oficina = localizarOficina(cnpj);
+    public Page<FuncionarioDTO> buscarTodosFuncionarios(Pageable pageable) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         return funcionarioRepository.findByOficina(oficina, pageable)
                 .map(funcionarioMapper::toResponseDTO);
     }
@@ -250,13 +242,12 @@ public class FuncionarioService {
     /**
      * Retorna todos os funcionários ativos da oficina (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param pageable Informações de paginação
      * @return Página de DTOs dos funcionários ativos
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public Page<FuncionarioDTO> buscarTodosFuncionariosAtivos(String cnpj, Pageable pageable) {
-        Oficina oficina = localizarOficina(cnpj);
+    public Page<FuncionarioDTO> buscarTodosFuncionariosAtivos(Pageable pageable) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         return funcionarioRepository.findByAtivoAndOficina(true, oficina, pageable)
                 .map(funcionarioMapper::toResponseDTO);
     }
@@ -264,13 +255,12 @@ public class FuncionarioService {
     /**
      * Retorna todos os funcionários inativos da oficina (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param pageable Informações de paginação
      * @return Página de DTOs dos funcionários inativos
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public Page<FuncionarioDTO> buscarTodosFuncionariosInativos(String cnpj, Pageable pageable) {
-        Oficina oficina = localizarOficina(cnpj);
+    public Page<FuncionarioDTO> buscarTodosFuncionariosInativos(Pageable pageable) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         return funcionarioRepository.findByAtivoAndOficina(false, oficina, pageable)
                 .map(funcionarioMapper::toResponseDTO);
     }

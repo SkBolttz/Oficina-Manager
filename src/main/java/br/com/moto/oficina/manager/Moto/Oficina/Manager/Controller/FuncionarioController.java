@@ -34,7 +34,7 @@ public class FuncionarioController {
         this.funcionarioService = funcionarioService;
     }
 
-    @PostMapping("/cadastrar/{cnpj}")
+    @PostMapping("/cadastrar")
     @Operation(summary = "Cadastrar funcionário", description = "Cadastra um novo funcionário para o estabelecimento informado pelo CNPJ.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Funcionário cadastrado com sucesso",
@@ -47,8 +47,6 @@ public class FuncionarioController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     public ResponseEntity<FuncionarioDTO> cadastrarFuncionario(
-            @Parameter(description = "CNPJ do estabelecimento", required = true)
-            @PathVariable String cnpj,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Dados para cadastro do funcionário",
                     required = true,
@@ -57,10 +55,10 @@ public class FuncionarioController {
             @RequestBody CadastrarFuncionarioDTO dto) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(funcionarioService.cadastrarFuncionario(cnpj, dto));
+                .body(funcionarioService.cadastrarFuncionario(dto));
     }
 
-    @PutMapping("/atualizar/{cnpj}/{cpf}")
+    @PutMapping("/atualizar")
     @Operation(summary = "Atualizar funcionário", description = "Atualiza os dados de um funcionário identificado pelo CPF.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Funcionário atualizado com sucesso",
@@ -73,10 +71,6 @@ public class FuncionarioController {
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content)
     })
     public ResponseEntity<FuncionarioDTO> atualizarFuncionario(
-            @Parameter(description = "CNPJ do estabelecimento", required = true)
-            @PathVariable String cnpj,
-            @Parameter(description = "CPF do funcionário", required = true)
-            @PathVariable String cpf,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Dados para atualização do funcionário",
                     required = true,
@@ -85,10 +79,10 @@ public class FuncionarioController {
             @RequestBody AtualizarFuncionarioDTO dto) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(funcionarioService.atualizarFuncionario(cnpj, cpf, dto));
+                .body(funcionarioService.atualizarFuncionario(dto));
     }
 
-    @PatchMapping("/ativar/{cnpj}/{cpf}")
+    @PatchMapping("/ativar/{cpf}")
     @Operation(summary = "Ativar funcionário", description = "Ativa um funcionário inativo identificado pelo CPF.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "202", description = "Ativação aceita",
@@ -98,16 +92,14 @@ public class FuncionarioController {
             @ApiResponse(responseCode = "409", description = "Conflito ao ativar funcionário", content = @Content)
     })
     public ResponseEntity<FuncionarioDTO> ativarFuncionario(
-            @Parameter(description = "CNPJ do estabelecimento", required = true)
-            @PathVariable String cnpj,
             @Parameter(description = "CPF do funcionário", required = true)
             @PathVariable String cpf) {
 
         return ResponseEntity.status(HttpStatus.ACCEPTED)
-                .body(funcionarioService.ativarFuncionario(cnpj, cpf));
+                .body(funcionarioService.ativarFuncionario(cpf));
     }
 
-    @PatchMapping("/desativar/{cnpj}/{cpf}")
+    @PatchMapping("/desativar/{cpf}")
     @Operation(summary = "Desativar funcionário", description = "Desativa um funcionário ativo identificado pelo CPF.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "202", description = "Desativação aceita",
@@ -117,85 +109,73 @@ public class FuncionarioController {
             @ApiResponse(responseCode = "409", description = "Conflito ao desativar funcionário", content = @Content)
     })
     public ResponseEntity<FuncionarioDTO> inativarFuncionario(
-            @Parameter(description = "CNPJ do estabelecimento", required = true)
-            @PathVariable String cnpj,
             @Parameter(description = "CPF do funcionário", required = true)
             @PathVariable String cpf) {
 
         return ResponseEntity.status(HttpStatus.ACCEPTED)
-                .body(funcionarioService.inativarFuncionario(cnpj, cpf));
+                .body(funcionarioService.inativarFuncionario(cpf));
     }
 
-    @GetMapping("/buscar/{cnpj}/cpf/{cpf}")
+    @GetMapping("/buscar/cpf/{cpf}")
     @Operation(summary = "Buscar funcionário por CPF", description = "Retorna o funcionário correspondente ao CPF informado.")
     @ApiResponse(responseCode = "200", description = "Funcionário encontrado",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = FuncionarioDTO.class)))
     public ResponseEntity<FuncionarioDTO> buscarFuncionario(
-            @Parameter(description = "CNPJ do estabelecimento", required = true)
-            @PathVariable String cnpj,
             @Parameter(description = "CPF do funcionário", required = true)
             @PathVariable String cpf) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(funcionarioService.buscarFuncionarioPorCPF(cnpj, cpf));
+                .body(funcionarioService.buscarFuncionarioPorCPF(cpf));
     }
 
-    @GetMapping("/buscar/{cnpj}/nome/{nome}")
+    @GetMapping("/buscar/nome/{nome}")
     @Operation(summary = "Buscar funcionários por nome", description = "Busca funcionários pelo nome com paginação.")
     @ApiResponse(responseCode = "200", description = "Funcionários encontrados",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = FuncionarioDTO.class)))
     public ResponseEntity<Page<FuncionarioDTO>> buscarFuncionarioPorNome(
-            @Parameter(description = "CNPJ do estabelecimento", required = true)
-            @PathVariable String cnpj,
             @Parameter(description = "Nome (ou parte) do funcionário", required = true)
             @PathVariable String nome,
             @PageableDefault(page = 0, size = 20, sort = "nome") Pageable pageable) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(funcionarioService.buscarFuncionarioPorNome(cnpj, nome, pageable));
+                .body(funcionarioService.buscarFuncionarioPorNome(nome, pageable));
     }
 
-    @GetMapping("/buscar/{cnpj}")
+    @GetMapping("/buscar")
     @Operation(summary = "Buscar todos os funcionários", description = "Retorna todos os funcionários (paginado) do estabelecimento.")
     @ApiResponse(responseCode = "200", description = "Funcionários retornados",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = FuncionarioDTO.class)))
     public ResponseEntity<Page<FuncionarioDTO>> buscarTodosFuncionarios(
-            @Parameter(description = "CNPJ do estabelecimento", required = true)
-            @PathVariable String cnpj,
             @PageableDefault(page = 0, size = 20, sort = "nome") Pageable pageable) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(funcionarioService.buscarTodosFuncionarios(cnpj, pageable));
+                .body(funcionarioService.buscarTodosFuncionarios(pageable));
     }
 
-    @GetMapping("/buscar/{cnpj}/ativo")
+    @GetMapping("/buscar/ativo")
     @Operation(summary = "Buscar funcionários ativos", description = "Retorna funcionários ativos (paginado) do estabelecimento.")
     @ApiResponse(responseCode = "200", description = "Funcionários ativos retornados",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = FuncionarioDTO.class)))
     public ResponseEntity<Page<FuncionarioDTO>> buscarFuncionariosAtivos(
-            @Parameter(description = "CNPJ do estabelecimento", required = true)
-            @PathVariable String cnpj,
             @PageableDefault(page = 0, size = 20, sort = "nome") Pageable pageable) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(funcionarioService.buscarTodosFuncionariosAtivos(cnpj, pageable));
+                .body(funcionarioService.buscarTodosFuncionariosAtivos(pageable));
     }
 
-    @GetMapping("/buscar/{cnpj}/inativo")
+    @GetMapping("/buscar/inativo")
     @Operation(summary = "Buscar funcionários inativos", description = "Retorna funcionários inativos (paginado) do estabelecimento.")
     @ApiResponse(responseCode = "200", description = "Funcionários inativos retornados",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = FuncionarioDTO.class)))
     public ResponseEntity<Page<FuncionarioDTO>> buscarFuncionariosInativos(
-            @Parameter(description = "CNPJ do estabelecimento", required = true)
-            @PathVariable String cnpj,
             @PageableDefault(page = 0, size = 20, sort = "nome") Pageable pageable) {
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(funcionarioService.buscarTodosFuncionariosInativos(cnpj, pageable));
+                .body(funcionarioService.buscarTodosFuncionariosInativos(pageable));
     }
 }
