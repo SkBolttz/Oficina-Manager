@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Cliente.*;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Util.ObterUsuarioLogado;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -59,7 +60,6 @@ public class ClienteService {
     /**
      * Cadastra um novo cliente vinculado a uma oficina.
      *
-     * @param cnpj CNPJ da oficina à qual o cliente será vinculado
      * @param dto  DTO com os dados de cadastro do cliente
      * @return DTO do cliente cadastrado
      * @throws CPFCNPJNuloException     se o CPF/CNPJ informado no DTO for null
@@ -68,10 +68,10 @@ public class ClienteService {
      * @throws EmailDuplicadoException  se o e-mail já estiver cadastrado na oficina
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada pelo CNPJ
      */
-    public ClienteDTO cadastrarCliente(String cnpj, ClienteCadastroDTO dto) {
+    public ClienteDTO cadastrarCliente(ClienteCadastroDTO dto) {
 
         String cpfCnpjNormalizado = normalizarCpfCnpj(dto.cpfCnpj());
-        Oficina oficina = localizarOficina(cnpj);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
 
         validarCpfCnpjDuplicado(oficina, cpfCnpjNormalizado);
         validarEmailDuplicado(oficina, dto.email());
@@ -99,8 +99,6 @@ public class ClienteService {
     /**
      * Atualiza um cliente existente.
      *
-     * @param cnpj    CNPJ da oficina
-     * @param cpfCnpj CPF/CNPJ do cliente a ser atualizado
      * @param dto     DTO contendo os campos a serem atualizados (campos nulos são ignorados)
      * @return DTO do cliente atualizado
      * @throws CPFCNPJNuloException se o cnpj passado for null
@@ -108,12 +106,12 @@ public class ClienteService {
      * @throws ClienteNaoLocalizadoException se o cliente não for encontrado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public ClienteDTO editarCliente(String cnpj, String cpfCnpj, ClienteAtualizarDTO dto) {
+    public ClienteDTO editarCliente(ClienteAtualizarDTO dto) {
 
-        String cnpjNormalizado = normalizarCpfCnpj(cnpj);
+        String cnpjNormalizado = normalizarCpfCnpj(ObterUsuarioLogado.obterCnpjUsuarioLogado());
 
         Oficina oficina = localizarOficina(cnpjNormalizado);
-        Cliente cliente = localizarClienteCpfCnpj(oficina, cpfCnpj);
+        Cliente cliente = localizarClienteCpfCnpj(oficina, dto.cnpjCpf());
 
         if (dto.nome() != null) {
             cliente.setNome(dto.nome());
@@ -125,7 +123,7 @@ public class ClienteService {
             cliente.setTelefone(dto.telefone());
         }
         if (dto.endereco() != null) {
-            enderecoService.atualizarEnderecoCliente(cnpj, cliente, dto.endereco());
+            enderecoService.atualizarEnderecoCliente(ObterUsuarioLogado.obterCnpjUsuarioLogado(), cliente, dto.endereco());
         }
 
         clienteRepository.save(cliente);
@@ -142,14 +140,13 @@ public class ClienteService {
     /**
      * Ativa um cliente.
      *
-     * @param cnpj    CNPJ da oficina
      * @param cpfCnpj CPF/CNPJ do cliente a ser ativado
      * @return DTO do cliente ativado
      * @throws ClienteNaoLocalizadoException se o cliente não for encontrado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public ClienteDTO ativarCliente(String cnpj, String cpfCnpj) {
-        Oficina oficina = localizarOficina(cnpj);
+    public ClienteDTO ativarCliente(String cpfCnpj) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Cliente cliente = localizarClienteCpfCnpj(oficina, cpfCnpj);
         cliente.setAtivo(true);
         return clienteMapper.toDto(cliente);
@@ -158,14 +155,13 @@ public class ClienteService {
     /**
      * Desativa um cliente.
      *
-     * @param cnpj    CNPJ da oficina
      * @param cpfCnpj CPF/CNPJ do cliente a ser desativado
      * @return DTO do cliente desativado
      * @throws ClienteNaoLocalizadoException se o cliente não for encontrado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public ClienteDTO desativarCliente(String cnpj, String cpfCnpj) {
-        Oficina oficina = localizarOficina(cnpj);
+    public ClienteDTO desativarCliente(String cpfCnpj) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Cliente cliente = localizarClienteCpfCnpj(oficina, cpfCnpj);
         cliente.setAtivo(false);
         return clienteMapper.toDto(cliente);
@@ -180,29 +176,27 @@ public class ClienteService {
     /**
      * Busca um cliente por CPF/CNPJ.
      *
-     * @param cnpj    CNPJ da oficina
      * @param cpfCnpj CPF/CNPJ do cliente
      * @return DTO do cliente encontrado
      * @throws ClienteNaoLocalizadoException se o cliente não for encontrado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public ClienteDTO buscarClientePorCpfCnpj(String cnpj, String cpfCnpj) {
-        Oficina oficina = localizarOficina(cnpj);
+    public ClienteDTO buscarClientePorCpfCnpj(String cpfCnpj) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         return clienteMapper.toDto(localizarClienteCpfCnpj(oficina, cpfCnpj));
     }
 
     /**
      * Busca clientes por nome (consulta paginada).
      *
-     * @param cnpj     CNPJ da oficina
      * @param nome     Termo a ser buscado no nome do cliente
      * @param pageable Informações de paginação
      * @return Página de DTOs de clientes que correspondem ao critério
      * @throws RecursoNaoEncontradoException se nenhum cliente for encontrado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public Page<ClienteDTO> buscarClientePorNome(String cnpj, String nome, Pageable pageable) {
-        Oficina oficina = localizarOficina(cnpj);
+    public Page<ClienteDTO> buscarClientePorNome(String nome, Pageable pageable) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
 
         Page<Cliente> clientes = clienteRepository
                 .findByNomeContainingIgnoreCaseAndOficina(nome, oficina, pageable);
@@ -217,13 +211,12 @@ public class ClienteService {
     /**
      * Retorna todos os clientes de uma oficina (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param pageable Informações de paginação
      * @return Página de DTOs dos clientes da oficina
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public Page<ClienteDTO> buscarTodosClientes(String cnpj, Pageable pageable) {
-        Oficina oficina = localizarOficina(cnpj);
+    public Page<ClienteDTO> buscarTodosClientes(Pageable pageable) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
 
         return clienteRepository.findAllByOficina(oficina, pageable)
                 .map(clienteMapper::toDto);
@@ -232,13 +225,12 @@ public class ClienteService {
     /**
      * Retorna todos os clientes ativos de uma oficina (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param pageable Informações de paginação
      * @return Página de DTOs dos clientes ativos
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public Page<ClienteDTO> buscarTodosAtivos(String cnpj, Pageable pageable) {
-        Oficina oficina = localizarOficina(cnpj);
+    public Page<ClienteDTO> buscarTodosAtivos(Pageable pageable) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
 
         return clienteRepository.findByAtivoAndOficina(true, oficina, pageable)
                 .map(clienteMapper::toDto);
@@ -247,13 +239,12 @@ public class ClienteService {
     /**
      * Retorna todos os clientes inativos de uma oficina (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param pageable Informações de paginação
      * @return Página de DTOs dos clientes inativos
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public Page<ClienteDTO> buscarTodosInativos(String cnpj, Pageable pageable) {
-        Oficina oficina = localizarOficina(cnpj);
+    public Page<ClienteDTO> buscarTodosInativos(Pageable pageable) {
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
 
         return clienteRepository.findByAtivoAndOficina(false, oficina, pageable)
                 .map(clienteMapper::toDto);
