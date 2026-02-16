@@ -4,6 +4,7 @@ import br.com.moto.oficina.manager.Moto.Oficina.Manager.Enum.OrdemServico.FormaP
 import java.math.BigDecimal;
 
 public record FinalizarOsDTO(
+        Long osId,
         Integer quilometragemSaida,
         String diagnostico,
         FormaPagamento formaPagamento,

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record   CriarOrdemServicoDTO(
+        String cpfCnpj,
+        String cpfFuncionarioResponsavel,
         String placaVeiculo,
         String descricaoProblema,
         Integer quilometragemEntrada,

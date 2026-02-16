@@ -8,6 +8,7 @@ import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Funcionario.Fu
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.OS.*;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Veiculo.VeiculoNaoLocalizadoException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Util.ObterUsuarioLogado;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -70,22 +71,19 @@ public class OrdemServicoService {
     /**
      * Cria uma nova ordem de serviço vinculada a uma oficina, cliente, veículo e funcionário responsável.
      *
-     * @param cnpj                    CNPJ da oficina
-     * @param cpfCnpj                 CPF ou CNPJ do cliente
-     * @param cpfFuncionarioResponsavel CPF do funcionário responsável
-     * @param dto                     DTO com os dados da ordem
+     * @param dto DTO com os dados da ordem
      * @return DTO da ordem de serviço criada
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws ClienteNaoLocalizadoException se o cliente não for encontrado
      * @throws VeiculoNaoLocalizadoException se o veículo não for encontrado
      * @throws FuncionarioNaoLocalizadoException se o funcionário não for encontrado
      */
-    public OrdemServicoDTO criarOrdemServico(String cnpj, String cpfCnpj,String cpfFuncionarioResponsavel, CriarOrdemServicoDTO dto) {
+    public OrdemServicoDTO criarOrdemServico(CriarOrdemServicoDTO dto) {
 
-        Oficina oficina = localizarOficina(cnpj);
-        Cliente cliente = localizarCliente(oficina, cpfCnpj);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
+        Cliente cliente = localizarCliente(oficina, dto.cpfCnpj());
         Veiculo veiculo = localizarVeiculo(oficina, dto.placaVeiculo());
-        Funcionario funcionario = localizarFuncionario(oficina, cpfFuncionarioResponsavel);
+        Funcionario funcionario = localizarFuncionario(oficina, dto.cpfFuncionarioResponsavel());
 
         OrdemServico os = osMapper.toEntity(dto);
         os.setNumero(gerarNumeroOS(oficina));
@@ -114,8 +112,6 @@ public class OrdemServicoService {
     /**
      * Adiciona um serviço à ordem de serviço.
      *
-     * @param cnpj  CNPJ da oficina
-     * @param osId  Identificador da ordem de serviço
      * @param dto   DTO contendo id do serviço a ser adicionado
      * @return DTO da ordem atualizada
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
@@ -124,10 +120,10 @@ public class OrdemServicoService {
      * @throws ServicoNaoLocalizadoException se o serviço não for encontrado
      * @throws ServicoDuplicadoOSException   se o serviço já estiver adicionado à OS
      */
-    public OrdemServicoDTO adicionarServicoOS(String cnpj, Long osId, AdicionarServicoOSDTO dto) {
+    public OrdemServicoDTO adicionarServicoOS(AdicionarServicoOSDTO dto) {
 
-        Oficina oficina = localizarOficina(cnpj);
-        OrdemServico os = localizarOS(osId, oficina);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
+        OrdemServico os = localizarOS(dto.osId(), oficina);
         validarOSAlteravel(os);
 
         Servico servico = servicoRepository.findByIdAndOficina(dto.idServico(), oficina)
@@ -160,8 +156,6 @@ public class OrdemServicoService {
     /**
      * Adiciona um produto (item de estoque) à ordem de serviço e atualiza o estoque.
      *
-     * @param cnpj  CNPJ da oficina
-     * @param osId  Identificador da ordem de serviço
      * @param dto   DTO contendo id do produto e quantidade
      * @return DTO da ordem atualizada
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
@@ -171,10 +165,10 @@ public class OrdemServicoService {
      * @throws StatusProdutoException        se o produto estiver inativo
      * @throws QuantidadeEstoqueException    se a quantidade solicitada for maior que o estoque disponível
      */
-    public OrdemServicoDTO adicionarProdutoOS(String cnpj, Long osId, AdicionarProdutoOSDTO dto) {
+    public OrdemServicoDTO adicionarProdutoOS(AdicionarProdutoOSDTO dto) {
 
-        Oficina oficina = localizarOficina(cnpj);
-        OrdemServico os = localizarOS(osId, oficina);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
+        OrdemServico os = localizarOS(dto.osId(), oficina);
         validarOSAlteravel(os);
 
         Estoque produto = estoqueRepository.findByIdAndOficina(dto.idProduto(), oficina)
@@ -211,7 +205,6 @@ public class OrdemServicoService {
     /**
      * Remove um item de serviço da ordem.
      *
-     * @param cnpj          CNPJ da oficina
      * @param osId          Identificador da ordem de serviço
      * @param itemServicoId Identificador do item de serviço na OS
      * @return DTO da ordem atualizada
@@ -219,9 +212,9 @@ public class OrdemServicoService {
      * @throws OSNaoLocalizadaException      se a ordem não for encontrada
      * @throws StatusOSException             se a OS não puder ser alterada no status atual
      */
-    public OrdemServicoDTO removerServicoOS(String cnpj, Long osId, Long itemServicoId) {
+    public OrdemServicoDTO removerServicoOS(Long osId, Long itemServicoId) {
 
-        Oficina oficina = localizarOficina(cnpj);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         OrdemServico os = localizarOS(osId, oficina);
         validarOSAlteravel(os);
 
@@ -235,7 +228,6 @@ public class OrdemServicoService {
     /**
      * Remove um item de produto da ordem e restaura o estoque.
      *
-     * @param cnpj         CNPJ da oficina
      * @param osId         Identificador da ordem de serviço
      * @param itemEstoqueId Identificador do item de estoque na OS
      * @return DTO da ordem atualizada
@@ -244,9 +236,9 @@ public class OrdemServicoService {
      * @throws StatusOSException             se a OS não puder ser alterada no status atual
      * @throws ProdutoNaoLocalizadoException se o item não for encontrado na OS
      */
-    public OrdemServicoDTO removerProdutoOS(String cnpj, Long osId, Long itemEstoqueId) {
+    public OrdemServicoDTO removerProdutoOS(Long osId, Long itemEstoqueId) {
 
-        Oficina oficina = localizarOficina(cnpj);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         OrdemServico os = localizarOS(osId, oficina);
         validarOSAlteravel(os);
 
@@ -272,16 +264,15 @@ public class OrdemServicoService {
     /**
      * Inicia a execução da OS (altera status para EM_EXECUCAO).
      *
-     * @param cnpj CNPJ da oficina
      * @param osId Identificador da ordem de serviço
      * @return DTO da ordem atualizada
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws OSNaoLocalizadaException      se a ordem não for encontrada
      * @throws StatusOSException             se a OS não estiver em ABERTA
      */
-    public OrdemServicoDTO iniciarOS(String cnpj, Long osId) {
+    public OrdemServicoDTO iniciarOS(Long osId) {
 
-        Oficina oficina = localizarOficina(cnpj);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         OrdemServico os = localizarOS(osId, oficina);
 
         if (os.getStatus() != Status.ABERTA) {
@@ -296,16 +287,15 @@ public class OrdemServicoService {
     /**
      * Coloca a OS no status AGUARDANDO_PECA.
      *
-     * @param cnpj CNPJ da oficina
      * @param osId Identificador da ordem de serviço
      * @return DTO da ordem atualizada
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws OSNaoLocalizadaException      se a ordem não for encontrada
      * @throws StatusOSException             se a OS não estiver em EM_EXECUCAO
      */
-    public OrdemServicoDTO aguardarPecaOS(String cnpj, Long osId) {
+    public OrdemServicoDTO aguardarPecaOS(Long osId) {
 
-        Oficina oficina = localizarOficina(cnpj);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         OrdemServico os = localizarOS(osId, oficina);
 
         if (os.getStatus() != Status.EM_EXECUCAO) {
@@ -320,18 +310,16 @@ public class OrdemServicoService {
     /**
      * Finaliza a OS, aplicando dados de conclusão, desconto e valores finais.
      *
-     * @param cnpj           CNPJ da oficina
-     * @param osId           Identificador da ordem de serviço
      * @param finalizarOsDTO DTO com dados finais (quilometragem, diagnóstico, pagamento, parcelas, garantia, desconto)
      * @return DTO da ordem finalizada
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws OSNaoLocalizadaException      se a ordem não for encontrada
      * @throws StatusOSException             se a OS já estiver finalizada
      */
-    public OrdemServicoDTO finalizarOS(String cnpj, Long osId, FinalizarOsDTO finalizarOsDTO) {
+    public OrdemServicoDTO finalizarOS(FinalizarOsDTO finalizarOsDTO) {
 
-        Oficina oficina = localizarOficina(cnpj);
-        OrdemServico os = localizarOS(osId, oficina);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
+        OrdemServico os = localizarOS(finalizarOsDTO.osId(), oficina);
 
         if (os.getStatus() == Status.FINALIZADA) {
             throw new StatusOSException("OS já finalizada");
@@ -358,16 +346,15 @@ public class OrdemServicoService {
     /**
      * Cancela a OS e restaura os estoques dos produtos utilizados.
      *
-     * @param cnpj CNPJ da oficina
      * @param osId Identificador da ordem de serviço
      * @return DTO da ordem cancelada
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws OSNaoLocalizadaException      se a ordem não for encontrada
      * @throws StatusOSException             se a OS já estiver finalizada
      */
-    public OrdemServicoDTO cancelarOS(String cnpj, Long osId) {
+    public OrdemServicoDTO cancelarOS(Long osId) {
 
-        Oficina oficina = localizarOficina(cnpj);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         OrdemServico os = localizarOS(osId, oficina);
 
         if (os.getStatus() == Status.FINALIZADA) {
@@ -392,15 +379,14 @@ public class OrdemServicoService {
     /**
      * Lista todas as ordens de serviço da oficina (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param pageable Informações de paginação
      * @return Página de DTOs das ordens encontradas
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws OSNaoLocalizadaException      se nenhuma ordem for encontrada
      */
-    public Page<OrdemServicoDTO> listarOrdensDeServico(String cnpj, Pageable pageable) {
+    public Page<OrdemServicoDTO> listarOrdensDeServico(Pageable pageable) {
 
-        Oficina oficina = localizarOficina(cnpj);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Page<OrdemServico> ordens = osRepository.findByOficina(oficina, pageable);
 
         if (ordens.isEmpty()) {
@@ -413,16 +399,15 @@ public class OrdemServicoService {
     /**
      * Lista ordens de serviço filtrando por status.
      *
-     * @param cnpj     CNPJ da oficina
      * @param status   Status desejado (pode ser null para todos)
      * @param pageable Informações de paginação
      * @return Página de DTOs das ordens encontradas
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws OSNaoLocalizadaException      se nenhuma ordem for encontrada com o status informado
      */
-    public Page<OrdemServicoDTO> listarOrdensDeServicoPorStatus(String cnpj, Status status, Pageable pageable) {
+    public Page<OrdemServicoDTO> listarOrdensDeServicoPorStatus(Status status, Pageable pageable) {
 
-        Oficina oficina = localizarOficina(cnpj);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Page<OrdemServico> ordens = osRepository.findByOficinaAndStatus(oficina, status, pageable);
 
         if (ordens.isEmpty()) {
@@ -435,15 +420,14 @@ public class OrdemServicoService {
     /**
      * Recupera uma OS por id.
      *
-     * @param cnpj CNPJ da oficina
      * @param osId Identificador da ordem de serviço
      * @return DTO da ordem encontrada
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws OSNaoLocalizadaException      se a ordem não for encontrada
      */
-    public OrdemServicoDTO listarOrdensDeServicoPorId(String cnpj, Long osId) {
+    public OrdemServicoDTO listarOrdensDeServicoPorId(Long osId) {
 
-        Oficina oficina = localizarOficina(cnpj);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         OrdemServico os = localizarOS(osId, oficina);
 
         return osMapper.toDTO(os);
@@ -452,7 +436,6 @@ public class OrdemServicoService {
     /**
      * Lista ordens de serviço de um funcionário, opcionalmente filtrando por status.
      *
-     * @param cnpj           CNPJ da oficina
      * @param cpfFuncionario CPF do funcionário
      * @param status         Status desejado (pode ser null)
      * @param pageable       Informações de paginação
@@ -462,12 +445,11 @@ public class OrdemServicoService {
      * @throws OSNaoLocalizadaException        se nenhuma ordem for encontrada para o critério
      */
     public Page<OrdemServicoDTO> listarOsDoFuncionario(
-            String cnpj,
             String cpfFuncionario,
             Status status,
             Pageable pageable
     ) {
-        Oficina oficina = localizarOficina(cnpj);
+        Oficina oficina = localizarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         Funcionario funcionario = localizarFuncionario(oficina, cpfFuncionario);
 
         Page<OrdemServico> os;
