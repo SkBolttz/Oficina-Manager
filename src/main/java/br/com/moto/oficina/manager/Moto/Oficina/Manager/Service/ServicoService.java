@@ -3,6 +3,7 @@ package br.com.moto.oficina.manager.Moto.Oficina.Manager.Service;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.OS.ServicoNaoLocalizadoException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Servico.ServicoDuplicadoException;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Util.ObterUsuarioLogado;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -51,15 +52,14 @@ public class ServicoService {
     /**
      * Cadastra um novo serviço para a oficina informada.
      *
-     * @param cnpj CNPJ da oficina
      * @param dto  DTO com os dados do serviço
      * @return DTO do serviço cadastrado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws ServicoDuplicadoException     se já existir serviço com a mesma descrição na oficina
      */
-    public ServicoDTO cadastrarServico(String cnpj, CadastrarServicoDTO dto) {
+    public ServicoDTO cadastrarServico(CadastrarServicoDTO dto) {
 
-        Oficina oficina = buscarOficina(cnpj);
+        Oficina oficina = buscarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
 
         validarDescricaoDuplicada(dto.descricao(), oficina.getId());
 
@@ -80,18 +80,15 @@ public class ServicoService {
      * Atualiza um serviço existente da oficina.
      *
      * Campos nulos no DTO são ignorados. Caso a descrição seja alterada, valida-se duplicidade.
-     *
-     * @param cnpj       CNPJ da oficina
-     * @param idServico  Identificador do serviço
      * @param dto        DTO com os campos a serem atualizados
      * @return DTO do serviço atualizado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws ServicoNaoLocalizadoException se o serviço não for localizado
      * @throws ServicoDuplicadoException     se a nova descrição já existir para a oficina
      */
-    public ServicoDTO atualizarServico(String cnpj, Long idServico, AtualizarServicoDTO dto) {
+    public ServicoDTO atualizarServico(AtualizarServicoDTO dto) {
 
-        Servico servico = buscarServicoOficina(cnpj, idServico);
+        Servico servico = buscarServicoOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado(), dto.idServico());
 
         if (dto.descricao() != null &&
                 !dto.descricao().equalsIgnoreCase(servico.getDescricao())) {
@@ -125,14 +122,13 @@ public class ServicoService {
     /**
      * Ativa um serviço da oficina.
      *
-     * @param cnpj      CNPJ da oficina
      * @param idServico Identificador do serviço
      * @return DTO do serviço ativado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws ServicoNaoLocalizadoException se o serviço não for localizado
      */
-    public ServicoDTO ativarServico(String cnpj, Long idServico) {
-        Servico servico = buscarServicoOficina(cnpj, idServico);
+    public ServicoDTO ativarServico(Long idServico) {
+        Servico servico = buscarServicoOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado(), idServico);
         servico.setAtivo(true);
         return servicoMapper.toDto(servico);
     }
@@ -140,14 +136,13 @@ public class ServicoService {
     /**
      * Desativa um serviço da oficina.
      *
-     * @param cnpj      CNPJ da oficina
      * @param idServico Identificador do serviço
      * @return DTO do serviço desativado
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws ServicoNaoLocalizadoException se o serviço não for localizado
      */
-    public ServicoDTO desativarServico(String cnpj, Long idServico) {
-        Servico servico = buscarServicoOficina(cnpj, idServico);
+    public ServicoDTO desativarServico(Long idServico) {
+        Servico servico = buscarServicoOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado(), idServico);
         servico.setAtivo(false);
         return servicoMapper.toDto(servico);
     }
@@ -161,15 +156,14 @@ public class ServicoService {
     /**
      * Busca serviços pela descrição (paginado).
      *
-     * @param cnpj      CNPJ da oficina
      * @param descricao Termo a ser buscado na descrição
      * @param pageable  Informações de paginação
      * @return Página de DTOs dos serviços encontrados
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      * @throws ServicoNaoLocalizadoException se nenhum serviço for encontrado
      */
-    public Page<ServicoDTO> buscarPorDescricao(String cnpj, String descricao, Pageable pageable) {
-        Oficina oficina = buscarOficina(cnpj);
+    public Page<ServicoDTO> buscarPorDescricao(String descricao, Pageable pageable) {
+        Oficina oficina = buscarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
 
         Page<Servico> servicos = servicoRepository.findByDescricaoContainingIgnoreCaseAndOficina(descricao, oficina,
                 pageable);
@@ -184,13 +178,12 @@ public class ServicoService {
     /**
      * Retorna todos os serviços da oficina (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param pageable Informações de paginação
      * @return Página de DTOs dos serviços
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public Page<ServicoDTO> buscarTodos(String cnpj, Pageable pageable) {
-        Oficina oficina = buscarOficina(cnpj);
+    public Page<ServicoDTO> buscarTodos(Pageable pageable) {
+        Oficina oficina = buscarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         return servicoRepository.findByOficina(oficina, pageable)
                 .map(servicoMapper::toDto);
     }
@@ -198,13 +191,12 @@ public class ServicoService {
     /**
      * Retorna serviços ativos da oficina (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param pageable Informações de paginação
      * @return Página de DTOs dos serviços ativos
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public Page<ServicoDTO> buscarAtivos(String cnpj, Pageable pageable) {
-        Oficina oficina = buscarOficina(cnpj);
+    public Page<ServicoDTO> buscarAtivos(Pageable pageable) {
+        Oficina oficina = buscarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         return servicoRepository.findByOficinaAndAtivo(oficina, true, pageable)
                 .map(servicoMapper::toDto);
     }
@@ -212,13 +204,12 @@ public class ServicoService {
     /**
      * Retorna serviços inativos da oficina (paginado).
      *
-     * @param cnpj     CNPJ da oficina
      * @param pageable Informações de paginação
      * @return Página de DTOs dos serviços inativos
      * @throws OficinaNaoLocalizadaException se a oficina não for encontrada
      */
-    public Page<ServicoDTO> buscarInativos(String cnpj, Pageable pageable) {
-        Oficina oficina = buscarOficina(cnpj);
+    public Page<ServicoDTO> buscarInativos(Pageable pageable) {
+        Oficina oficina = buscarOficina(ObterUsuarioLogado.obterCnpjUsuarioLogado());
         return servicoRepository.findByOficinaAndAtivo(oficina, false, pageable)
                 .map(servicoMapper::toDto);
     }
