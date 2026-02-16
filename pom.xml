@@ -50,12 +50,6 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- SESSION JDBC -->
-        <dependency>
-            <groupId>org.springframework.session</groupId>
-            <artifactId>spring-session-jdbc</artifactId>
-        </dependency>
-
         <!-- POSTGRES -->
         <dependency>
             <groupId>org.postgresql</groupId>

@@ -35,6 +35,7 @@ public class AutenticacaoService {
         user.setRole(Role.OFICINA);
         usuarioRepository.save(user);
 
+        System.out.println("Senha gerada para o usuário com CNPJ " + cnpj + ": " + senhaGerada);
         return "Oficina cadastrada com sucesso, por favor, verifique o seu e-mail para obter a senha de acesso.";
     }
 

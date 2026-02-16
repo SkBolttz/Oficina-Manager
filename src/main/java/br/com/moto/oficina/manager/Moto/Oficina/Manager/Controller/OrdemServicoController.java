@@ -1,19 +1,15 @@
 package br.com.moto.oficina.manager.Moto.Oficina.Manager.Controller;
 
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.OrdemServico.*;
-import br.com.moto.oficina.manager.Moto.Oficina.Manager.Enum.OrdemServico.Status;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Service.OrdemServicoService;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

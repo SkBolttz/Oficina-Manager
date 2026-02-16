@@ -9,6 +9,7 @@ import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.CNPJIn
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.DuplicidadeCnpjException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Exception.Oficina.OficinaNaoLocalizadaException;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Repository.UsuarioRepository;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Util.ObterUsuarioLogado;
 import org.springframework.stereotype.Service;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Api.ReceitaWS;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.DTO.Oficina.AtualizarOficinaDTO;

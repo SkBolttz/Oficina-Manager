@@ -6,6 +6,7 @@ import br.com.moto.oficina.manager.Moto.Oficina.Manager.Entity.Usuario;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Security.TokenJWT;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Security.TokenService;
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Service.AutenticacaoService;
+import br.com.moto.oficina.manager.Moto.Oficina.Manager.Util.ObterUsuarioLogado;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -55,6 +56,7 @@ public class AutenticacaoController {
         Usuario usuario = (Usuario) authentication.getPrincipal();
         String token = tokenService.gerarToken(usuario);
 
+        ObterUsuarioLogado.obterCnpjUsuarioLogado();
         return ResponseEntity.ok(new TokenJWT(token));
     }
 

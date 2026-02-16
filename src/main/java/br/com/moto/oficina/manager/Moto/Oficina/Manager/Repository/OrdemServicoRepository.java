@@ -1,5 +1,7 @@
 package br.com.moto.oficina.manager.Moto.Oficina.Manager.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import br.com.moto.oficina.manager.Moto.Oficina.Manager.Entity.Funcionario;
@@ -23,4 +25,6 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
     Page<OrdemServico> findByOficinaAndFuncionarioResponsavel(Oficina oficina, Funcionario funcionario, Pageable pageable);
 
     Page<OrdemServico> findByOficinaAndFuncionarioResponsavelAndStatus(Oficina oficina, Funcionario funcionario, Status status, Pageable pageable);
+
+    List<OrdemServico> findByStatusInAndPrazoEntregaBefore(List<Status> status, LocalDateTime localDateTime);
 }
